@@ -1,4 +1,16 @@
 package br.com.banksecure.app.dto.request;
 
-public record FuncionarioRequest(String nome, String cargo, String username, String password) {
-}
+import jakarta.validation.constraints.NotBlank;
+
+public record FuncionarioRequest(
+        @NotBlank(message = "Nome é obrigatório.")
+        String nome,
+
+        @NotBlank(message = "Cargo é obrigatório.")
+        String cargo,
+
+        @NotBlank(message = "Usuário é obrigatório.")
+        String username,
+
+        @NotBlank(message = "Senha é obrigatória.")
+        String password) {}
