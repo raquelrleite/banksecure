@@ -13,4 +13,5 @@ public record FuncionarioRequest(
         String username,
 
         @NotBlank(message = "Senha é obrigatória.")
-        String password) {}
+        String password) {
+}

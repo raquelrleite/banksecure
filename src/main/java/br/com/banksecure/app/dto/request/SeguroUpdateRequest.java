@@ -6,4 +6,5 @@ public record SeguroUpdateRequest(
         String titulo,
         String coberturaMinima,
         BigDecimal valorPremioBase
-) {}
+) {
+}
