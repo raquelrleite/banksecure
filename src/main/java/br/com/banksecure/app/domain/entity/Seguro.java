@@ -24,8 +24,6 @@ public class Seguro {
     @NotBlank(message = "Título é obrigatório.")
     private String titulo;
 
-    @Column(nullable = false)
-    @NotBlank(message = "Cobertura Mínima é obrigatória.")
     private String coberturaMinima;
 
     @Column(nullable = false)
