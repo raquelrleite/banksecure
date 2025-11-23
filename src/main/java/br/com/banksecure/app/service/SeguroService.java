@@ -51,8 +51,8 @@ public class SeguroService {
         return mapper.converterParaResponse(seguroAtualizado);
     }
 
-    public void excluir (Long id) {
-      Seguro seguro = seguroRepository.findById(id)
+    public void excluir(Long id) {
+        Seguro seguro = seguroRepository.findById(id)
                 .orElseThrow(
                         () -> new SeguroNaoEncontradoException(SEGURO_NAO_ENCONTRADO.getMessage()));
 

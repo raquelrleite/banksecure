@@ -6,7 +6,7 @@ import br.com.banksecure.app.dto.response.SeguroResponse;
 
 public class SeguroMapper {
 
-    public Seguro converterParaEntity(SeguroRequest request){
+    public Seguro converterParaEntity(SeguroRequest request) {
         Seguro seguro = new Seguro();
         seguro.setTitulo(request.titulo());
         seguro.setCoberturaMinima(request.coberturaMinima());
@@ -15,7 +15,7 @@ public class SeguroMapper {
         return seguro;
     }
 
-    public SeguroResponse converterParaResponse(Seguro seguro){
+    public SeguroResponse converterParaResponse(Seguro seguro) {
         return new SeguroResponse(
                 seguro.getId(),
                 seguro.getTitulo(),

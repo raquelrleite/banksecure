@@ -17,7 +17,7 @@ public class ClienteMapper {
         return cliente;
     }
 
-    public ClienteResponse converterParaResponse(Cliente cliente){
+    public ClienteResponse converterParaResponse(Cliente cliente) {
         return new ClienteResponse(
                 cliente.getId(),
                 cliente.getNome(),

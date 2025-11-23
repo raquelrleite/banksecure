@@ -15,4 +15,5 @@ public record ClienteRequest(
         String cpf,
 
         @NotNull(message = "Data de nascimento é obrigatória")
-        LocalDate dataNascimento) {}
+        LocalDate dataNascimento) {
+}
