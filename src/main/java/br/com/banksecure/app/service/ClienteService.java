@@ -3,7 +3,8 @@ package br.com.banksecure.app.service;
 import br.com.banksecure.app.domain.entity.Cliente;
 import br.com.banksecure.app.dto.request.ClienteRequest;
 import br.com.banksecure.app.dto.response.ClienteResponse;
-import br.com.banksecure.app.exception.MenorIdadeException;
+import br.com.banksecure.app.exception.CpfExistenteException;
+import br.com.banksecure.app.exception.IdadeInvalidaException;
 import br.com.banksecure.app.mapper.ClienteMapper;
 import br.com.banksecure.app.repository.ClienteRepository;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 
-import static br.com.banksecure.app.enums.ErrorMessage.MENOR_IDADE;
+import static br.com.banksecure.app.enums.ErrorMessage.*;
 
 @Service
 public class ClienteService {
@@ -26,9 +27,11 @@ public class ClienteService {
         this.mapper = mapper;
     }
 
-    public ClienteResponse create(ClienteRequest request) {
+    public ClienteResponse cadastrar(ClienteRequest request) {
+        if (clienteRepository.existsByCpf(request.cpf())){
+            throw new CpfExistenteException(CPF_JA_EXISTE.getMessage());
+        }
         Cliente cliente = mapper.converterParaEntity(request);
-
         validarMaioridade(cliente.getDataNascimento());
 
         clienteRepository.save(cliente);
@@ -38,10 +41,16 @@ public class ClienteService {
 
 
     private void validarMaioridade(LocalDate dataNascimento) {
+
         int idade = Period.between(dataNascimento, LocalDate.now()).getYears();
 
         if (idade < 18) {
-            throw new MenorIdadeException(MENOR_IDADE.getMessage());
+            throw new IdadeInvalidaException(MENOR_IDADE.getMessage());
+        }
+
+        final int idadeMax = 120;
+        if (idade > idadeMax) {
+            throw new IdadeInvalidaException(MAIOR_QUE_120.getMessage());
         }
     }
 

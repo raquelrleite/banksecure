@@ -3,6 +3,7 @@ package br.com.banksecure.app.domain.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,5 +32,6 @@ public class Cliente {
 
     @Column(nullable = false)
     @NotNull(message = "Data de nascimento é obrigatória.")
+    @Past(message = "A data de nascimento deve estar no passado")
     private LocalDate dataNascimento;
 }
