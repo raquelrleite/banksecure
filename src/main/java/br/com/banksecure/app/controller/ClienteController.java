@@ -13,16 +13,16 @@ import java.util.List;
 @RequestMapping("clientes")
 public class ClienteController {
 
-    private ClienteService service;
+    private final ClienteService service;
 
     public ClienteController(ClienteService service) {
         this.service = service;
     }
 
     @PostMapping
-    public ResponseEntity<String> cadastrar(@RequestBody @Valid ClienteRequest request) {
-        service.cadastrar(request);
-        return ResponseEntity.ok("Cliente cadastrado.");
+    public ResponseEntity<ClienteResponse> cadastrar(@RequestBody @Valid ClienteRequest request) {
+        ClienteResponse cliente = service.cadastrar(request);
+        return ResponseEntity.ok(cliente);
     }
 
     @GetMapping
