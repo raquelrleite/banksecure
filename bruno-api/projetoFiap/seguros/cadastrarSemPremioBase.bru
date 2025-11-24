@@ -1,0 +1,23 @@
+meta {
+  name: cadastrarSemPremioBase
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/seguros
+  body: json
+  auth: inherit
+}
+
+body:json {
+  { "titulo": "Seguro Residencial",
+    "coberturaMinima": "Só a fechadura",
+     "valorPremioBase":""
+  
+  }
+}
+
+settings {
+  encodeUrl: true
+}

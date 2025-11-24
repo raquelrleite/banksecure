@@ -1,0 +1,23 @@
+meta {
+  name: cadastrarsemDataNascimento
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:8080/clientes
+  body: json
+  auth: inherit
+}
+
+body:json {
+  { "nome": "Raquel",
+    "cpf": "96771278026",
+     "dataNascimento":""
+  
+  }
+}
+
+settings {
+  encodeUrl: true
+}

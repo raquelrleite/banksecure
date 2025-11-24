@@ -1,0 +1,23 @@
+meta {
+  name: cadastrarSemCpf
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/clientes
+  body: json
+  auth: inherit
+}
+
+body:json {
+  { "nome": "Raquel",
+    "cpf": " ",
+     "dataNascimento":" 2000-04-04"
+  
+  }
+}
+
+settings {
+  encodeUrl: true
+}

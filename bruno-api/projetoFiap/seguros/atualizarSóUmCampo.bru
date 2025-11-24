@@ -1,0 +1,23 @@
+meta {
+  name: atualizarSóUmCampo
+  type: http
+  seq: 5
+}
+
+patch {
+  url: http://localhost:8080/seguros/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  { "titulo": "",
+    "coberturaMinima": "Só a fechadura",
+     "valorPremioBase":""
+  
+  }
+}
+
+settings {
+  encodeUrl: true
+}
