@@ -1,0 +1,21 @@
+meta {
+  name: loginUsuarioErrado
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/funcionarios/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  { "username": "leticia.rangelo",
+    "password": "40028922"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

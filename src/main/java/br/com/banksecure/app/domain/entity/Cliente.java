@@ -1,5 +1,6 @@
 package br.com.banksecure.app.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,5 +34,6 @@ public class Cliente {
     @Column(nullable = false)
     @NotNull(message = "Data de nascimento é obrigatória.")
     @Past(message = "A data de nascimento deve estar no passado")
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataNascimento;
 }

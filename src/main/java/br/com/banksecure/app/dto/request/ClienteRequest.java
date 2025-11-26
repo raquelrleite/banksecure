@@ -1,5 +1,6 @@
 package br.com.banksecure.app.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -17,5 +18,6 @@ public record ClienteRequest(
 
         @NotNull(message = "Data de nascimento é obrigatória")
         @Past(message = "Data de nascimento deve estar no passado")
+        @JsonFormat(pattern = "dd/MM/yyyy")
         LocalDate dataNascimento) {
 }

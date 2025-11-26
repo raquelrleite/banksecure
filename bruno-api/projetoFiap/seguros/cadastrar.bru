@@ -1,0 +1,29 @@
+meta {
+  name: cadastrar
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/seguros
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+  ~X-Funcionario-Id: 2
+}
+
+body:json {
+  { "titulo": "Seguro Residencial",
+    "coberturaMinima": "Só a fechadura",
+     "valorPremioBase":"30"
+  
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

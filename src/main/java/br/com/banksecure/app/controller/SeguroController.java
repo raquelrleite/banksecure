@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("seguros")
 public class SeguroController {
@@ -19,23 +21,32 @@ public class SeguroController {
     }
 
     @PostMapping
-    public ResponseEntity<SeguroResponse> cadastrar(@RequestBody @Valid SeguroRequest request) {
-        SeguroResponse seguro = service.cadastrar(request);
-        return ResponseEntity.ok(seguro);
+    public ResponseEntity<SeguroResponse> cadastrar(@RequestBody @Valid SeguroRequest request,
+                                                    @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
+        var autenticar = service.cadastrar(request, funcionarioId);
+        return ResponseEntity.ok(autenticar);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SeguroResponse>> listarTodos() {
+        return ResponseEntity.ok(service.listarTodos());
     }
 
     @PatchMapping("{id}")
     public ResponseEntity<SeguroResponse> atualizar(
             @PathVariable Long id,
-            @RequestBody @Valid SeguroUpdateRequest request) {
+            @RequestBody @Valid SeguroUpdateRequest request,
+            @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
 
-        SeguroResponse seguro = service.atualizar(id, request);
-        return ResponseEntity.ok(seguro);
+        var autenticar = service.atualizar(id, request, funcionarioId);
+        return ResponseEntity.ok(autenticar);
     }
 
-    @DeleteMapping("{id}")
-    public void excluir(@PathVariable Long id) {
-        service.excluir(id);
+    @DeleteMapping("{idSeguro}")
+    public ResponseEntity<String> excluir(@PathVariable Long idSeguro,
+                                          @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
+        service.excluir(idSeguro, funcionarioId);
+        return ResponseEntity.ok("Seguro deletado!");
     }
 
 

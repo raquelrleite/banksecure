@@ -11,7 +11,8 @@ public enum ErrorMessage {
     SEGURO_NAO_ENCONTRADO("Seguro não encontrado!"),
     LOGIN_INVALIDO("Usuário ou senha incorretos"),
     USERNAME_INVALIDO("Usuário já existe."),
-    CPF_JA_EXISTE("Já existe um cliente cadastrado com este CPF.");
+    CPF_JA_EXISTE("Já existe um cliente cadastrado com este CPF."),
+    ACESSO_NEGADO("Acesso negado.");
 
-    private String message;
+    private final String message;
 }
