@@ -10,6 +10,11 @@ post {
   auth: inherit
 }
 
+headers {
+  X-Funcionario-Id: 1
+  ~X-Funcionario-Id: 2
+}
+
 body:json {
   { "titulo": "Seguro Residencial",
     "coberturaMinima": "Só a fechadura",
@@ -20,4 +25,5 @@ body:json {
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

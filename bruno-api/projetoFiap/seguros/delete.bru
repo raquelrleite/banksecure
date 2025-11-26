@@ -1,10 +1,10 @@
 meta {
-  name: atualizarSóUmCampo
+  name: delete
   type: http
-  seq: 4
+  seq: 6
 }
 
-patch {
+delete {
   url: http://localhost:8080/seguros/1
   body: json
   auth: inherit
@@ -12,14 +12,7 @@ patch {
 
 headers {
   X-Funcionario-Id: 1
-}
-
-body:json {
-  { "titulo": "",
-    "coberturaMinima": "Só a maçaneta",
-     "valorPremioBase":"600.00"
-  
-  }
+  ~X-Funcionario-Id: 2
 }
 
 settings {

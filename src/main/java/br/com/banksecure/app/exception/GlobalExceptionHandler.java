@@ -19,6 +19,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorMessage.LOGIN_INVALIDO.getMessage());
     }
 
+    @ExceptionHandler(AcessoNegadoException.class)
+    public ResponseEntity<String> handleAcessoNegadoException(){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorMessage.ACESSO_NEGADO.getMessage());
+    }
+
 
     @ExceptionHandler(IdadeInvalidaException.class)
     public ResponseEntity<String> handleIdadeInvalidaException(IdadeInvalidaException ex){
