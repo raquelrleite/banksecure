@@ -1,0 +1,23 @@
+meta {
+  name: cadastrarSemUsername
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/funcionarios
+  body: json
+  auth: inherit
+}
+
+body:json {
+  { "nome": "Leticia",
+    "cargo": "Analista Pleno",
+    "username": "",
+    "password": "40028922"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
