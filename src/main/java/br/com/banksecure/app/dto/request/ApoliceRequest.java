@@ -1,0 +1,11 @@
+package br.com.banksecure.app.dto.request;
+
+import jakarta.validation.constraints.NotNull;
+
+public record ApoliceRequest (
+        @NotNull(message = "O ID do cliente é obrigatório")
+        Long idCliente,
+
+        @NotNull(message = "O ID do seguro é obrigatório")
+        Long idSeguro
+) { }
