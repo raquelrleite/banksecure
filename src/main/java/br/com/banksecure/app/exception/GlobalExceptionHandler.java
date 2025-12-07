@@ -1,6 +1,5 @@
 package br.com.banksecure.app.exception;
 
-import br.com.banksecure.app.enums.ErrorMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -8,62 +7,88 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(LoginInvalidoException.class)
-    public ResponseEntity<String> handleLoginInvalidoException(){
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorMessage.LOGIN_INVALIDO.getMessage());
+    @ExceptionHandler({
+            ApoliceNaoEncontradaException.class,
+            BemNaoEncontradoException.class,
+            ClienteNaoEncontradoException.class,
+            SeguroNaoEncontradoException.class,
+    })
+    public ResponseEntity<ApiErrorResponse> handleNotFound(RuntimeException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler({
+            BemPossuiSeguroException.class,
+            ClientePossuiSegVidaException.class,
+            IdadeInvalidaException.class
+    })
+    public ResponseEntity<ApiErrorResponse> handleBadRequest(RuntimeException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler({
+            CpfExistenteException.class,
+            SeguroExistenteException.class
+    })
+    public ResponseEntity<ApiErrorResponse> handleConflict(RuntimeException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler({
+            LoginInvalidoException.class,
+            UsernameInvalidoException.class
+    })
+    public ResponseEntity<ApiErrorResponse> handleAuthentication(RuntimeException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler(AcessoNegadoException.class)
-    public ResponseEntity<String> handleAcessoNegadoException(){
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorMessage.ACESSO_NEGADO.getMessage());
-    }
-
-
-    @ExceptionHandler(IdadeInvalidaException.class)
-    public ResponseEntity<String> handleIdadeInvalidaException(IdadeInvalidaException ex){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-    }
-
-
-    @ExceptionHandler(SeguroNaoEncontradoException.class)
-    public ResponseEntity<String> handleSeguroNaoEncontradoException(){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorMessage.SEGURO_NAO_ENCONTRADO.getMessage());
-    }
-
-    @ExceptionHandler(ClienteNaoEncontradoException.class)
-    public ResponseEntity<String> handleClienteNaoEncontradoException(){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorMessage.CLIENTE_NAO_ENCONTRADO.getMessage());
-    }
-
-    @ExceptionHandler(UsernameInvalidoException.class)
-    public ResponseEntity<String> handleUsernameInvalidoException(){
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorMessage.USERNAME_INVALIDO.getMessage());
-    }
-
-    @ExceptionHandler(CpfExistenteException.class)
-    public ResponseEntity<String> handleCpfExistenteException(){
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorMessage.CPF_JA_EXISTE.getMessage());
-    }
-
-    @ExceptionHandler(ApoliceNaoEncontradaException.class)
-    public ResponseEntity<String> handleApoliceNaoEncontradaException(){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorMessage.APOLICE_NAO_ENCONTRADA.getMessage());
+    public ResponseEntity<ApiErrorResponse> handleAccessDenied(AcessoNegadoException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> tratarErrosDeValidacao(MethodArgumentNotValidException ex) {
-        Map<String, String> erros = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> tratarErrosDeValidacao(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(erro -> {
             String campo = ((FieldError) erro).getField();
             String mensagem = erro.getDefaultMessage();
-            erros.put(campo, mensagem);
+            errors.put(campo, mensagem);
         });
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erros);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "Erro de Validação");
+        response.put("messages", errors);
+        response.put("timestamp", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message) {
+        ApiErrorResponse errorResponse = new ApiErrorResponse(
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(status).body(errorResponse);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception ex) {
+        ex.printStackTrace();
+
+        return buildResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde."
+        );
     }
 }

@@ -19,18 +19,19 @@ import static br.com.banksecure.app.enums.ErrorMessage.*;
 @Service
 public class ClienteService {
 
-    private final ClienteRepository clienteRepository;
+    private final ClienteRepository repository;
 
     private final ClienteMapper mapper;
 
-    public ClienteService(ClienteRepository clienteRepository, ClienteMapper mapper) {
-        this.clienteRepository = clienteRepository;
+    public ClienteService(ClienteRepository repository, ClienteMapper mapper) {
+        this.repository = repository;
         this.mapper = mapper;
     }
 
+
     @Transactional
     public ClienteResponse cadastrar(ClienteRequest request) {
-        if (clienteRepository.existsByCpf(request.cpf())) {
+        if (repository.existsByCpf(request.cpf())) {
             throw new CpfExistenteException(CPF_JA_EXISTE.getMessage());
         }
 
@@ -38,7 +39,7 @@ public class ClienteService {
 
         validarMaioridade(cliente.getDataNascimento());
 
-        clienteRepository.save(cliente);
+        repository.save(cliente);
 
         return mapper.converterParaResponse(cliente);
     }
@@ -58,11 +59,9 @@ public class ClienteService {
     }
 
     public List<ClienteResponse> listarTodosClientes() {
-        List<Cliente> clientes = clienteRepository.findAll();
+        List<Cliente> clientes = repository.findAll();
         return clientes.stream()
                 .map(mapper::converterParaResponse)
                 .toList();
     }
-
-
 }
