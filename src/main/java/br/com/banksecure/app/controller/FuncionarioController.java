@@ -5,7 +5,6 @@ import br.com.banksecure.app.dto.request.LoginRequest;
 import br.com.banksecure.app.dto.response.FuncionarioResponse;
 import br.com.banksecure.app.service.FuncionarioService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,14 +21,12 @@ public class FuncionarioController {
     }
 
     @PostMapping
-    public ResponseEntity<FuncionarioResponse> cadastrar(@RequestBody @Valid FuncionarioRequest request) {
-        FuncionarioResponse funcionario = service.cadastrarFuncionario(request);
-        return ResponseEntity.ok(funcionario);
+    public FuncionarioResponse cadastrar(@RequestBody @Valid FuncionarioRequest request) {
+        return service.cadastrar(request);
     }
 
     @PostMapping("login")
-    public ResponseEntity<FuncionarioResponse> login(@RequestBody @Valid LoginRequest request) {
-        FuncionarioResponse funcionario = service.login(request);
-        return ResponseEntity.ok(funcionario);
+    public FuncionarioResponse login(@RequestBody @Valid LoginRequest request) {
+        return service.login(request);
     }
 }

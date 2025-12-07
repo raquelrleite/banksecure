@@ -17,30 +17,30 @@ import static br.com.banksecure.app.enums.ErrorMessage.USERNAME_INVALIDO;
 @Service
 public class FuncionarioService {
 
-    private final FuncionarioRepository funcionarioRepository;
+    private final FuncionarioRepository repository;
     private final FuncionarioMapper mapper;
 
-    public FuncionarioService(FuncionarioRepository funcionarioRepository, FuncionarioMapper mapper) {
-        this.funcionarioRepository = funcionarioRepository;
+    public FuncionarioService(FuncionarioRepository repository, FuncionarioMapper mapper) {
+        this.repository = repository;
         this.mapper = mapper;
     }
 
     @Transactional
-    public FuncionarioResponse cadastrarFuncionario(FuncionarioRequest request) {
+    public FuncionarioResponse cadastrar(FuncionarioRequest request) {
         Funcionario funcionario = mapper.converterParaEntity(request);
 
-        if (funcionarioRepository.existsByUsername(request.username())) {
+        if (repository.existsByUsername(request.username())) {
             throw new UsernameInvalidoException(USERNAME_INVALIDO.getMessage());
         }
 
-        Funcionario funcionarioSalvo = funcionarioRepository.save(funcionario);
+        Funcionario funcionarioSalvo = repository.save(funcionario);
 
         return mapper.converterParaResponse(funcionarioSalvo);
     }
 
     public FuncionarioResponse login(LoginRequest request) {
 
-        Funcionario funcionario = funcionarioRepository.
+        Funcionario funcionario = repository.
                 findByUsernameAndPassword(request.username(), request.password())
                 .orElseThrow(
                         () -> new LoginInvalidoException(LOGIN_INVALIDO.getMessage()));
