@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.Period;
 
 import static br.com.banksecure.app.enums.ErrorMessage.CLIENTE_NAO_ENCONTRADO;
 import static br.com.banksecure.app.enums.ErrorMessage.SEGURO_NAO_ENCONTRADO;
@@ -48,13 +50,22 @@ public class ApoliceService {
                 .orElseThrow(
                         () -> new ClienteNaoEncontradoException(CLIENTE_NAO_ENCONTRADO.getMessage()));
 
-        BigDecimal valorBase = seguro.getValorPremioBase();
+        BigDecimal taxaFixa = seguro.getValorPremioBase().multiply(BigDecimal.valueOf(0.05));
 
-        //aplicar aqui a logica rf07, linha abaixo escrita somente para o codigo não dar erro
-        BigDecimal valorFinal = valorBase;
+        BigDecimal valorFinal = seguro.getValorPremioBase().add(taxaFixa);
+
+        BigDecimal taxaDeRisco = BigDecimal.valueOf(1.10);
+
+        int idade = Period.between(cliente.getDataNascimento(),LocalDate.now()).getYears();
+
+        if(idade>60){
+            valorFinal = valorFinal.add(BigDecimal.valueOf(100));
+        }
+
+        valorFinal = valorFinal.multiply(taxaDeRisco);
 
 
-    return valorFinal;
+    return valorFinal.setScale(2, RoundingMode.HALF_UP);
     }
 
     public ApoliceResponse gerarApolice (ApoliceRequest request){
