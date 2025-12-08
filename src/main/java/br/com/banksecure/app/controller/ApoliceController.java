@@ -24,5 +24,4 @@ public class ApoliceController {
         ApoliceResponse response = service.gerarApolice(request);
         return ResponseEntity.ok(response);
     }
-//    @RequestHeader ("X-Funcionario-id") Long funcionarioId
 }

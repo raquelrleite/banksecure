@@ -45,7 +45,6 @@ public class ApoliceService {
                 .orElseThrow(
                         () -> new SeguroNaoEncontradoException(SEGURO_NAO_ENCONTRADO.getMessage()));
 
-
         Cliente cliente = clienteRepository.findById(request.idCliente())
                 .orElseThrow(
                         () -> new ClienteNaoEncontradoException(CLIENTE_NAO_ENCONTRADO.getMessage()));

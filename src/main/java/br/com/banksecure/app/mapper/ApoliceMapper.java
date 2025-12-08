@@ -8,8 +8,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ApoliceMapper {
 
-    @Mapping(target = "clienteId", source = "cliente.id")
-    @Mapping(target = "seguroId", source = "seguro.id")
+    @Mapping(target = "idCliente", source = "cliente.id")
+    @Mapping(target = "idSeguro", source = "seguro.id")
     ApoliceResponse converterParaResponse(Apolice apolice);
 
 }
