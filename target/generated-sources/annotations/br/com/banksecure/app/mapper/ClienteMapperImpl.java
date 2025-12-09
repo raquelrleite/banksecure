@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-04T23:37:57-0300",
-    comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
+    date = "2025-12-08T21:02:01-0300",
+    comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 @Component
 public class ClienteMapperImpl implements ClienteMapper {
@@ -23,9 +23,9 @@ public class ClienteMapperImpl implements ClienteMapper {
 
         Cliente cliente = new Cliente();
 
-        cliente.setNome( request.nome() );
         cliente.setCpf( request.cpf() );
         cliente.setDataNascimento( request.dataNascimento() );
+        cliente.setNome( request.nome() );
 
         return cliente;
     }

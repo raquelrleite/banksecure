@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-04T23:37:57-0300",
-    comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
+    date = "2025-12-08T21:02:01-0300",
+    comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 @Component
 public class SeguroMapperImpl implements SeguroMapper {
@@ -23,8 +23,8 @@ public class SeguroMapperImpl implements SeguroMapper {
 
         Seguro seguro = new Seguro();
 
-        seguro.setTitulo( request.titulo() );
         seguro.setCoberturaMinima( request.coberturaMinima() );
+        seguro.setTitulo( request.titulo() );
         seguro.setValorPremioBase( request.valorPremioBase() );
 
         return seguro;
