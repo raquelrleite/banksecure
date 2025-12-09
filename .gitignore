@@ -1,0 +1,7 @@
+# Ignorar saída de build do Maven
+target/
+
+# IDE / editor (opcional)
+.idea/
+*.iml
+.vscode/

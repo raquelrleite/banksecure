@@ -5,7 +5,10 @@ import br.com.banksecure.app.domain.entity.Apolice;
 import br.com.banksecure.app.domain.entity.Cliente;
 import br.com.banksecure.app.domain.entity.Seguro;
 import br.com.banksecure.app.dto.request.ApoliceRequest;
+import br.com.banksecure.app.dto.request.RenovacaoApoliceRequest;
 import br.com.banksecure.app.dto.response.ApoliceResponse;
+import br.com.banksecure.app.dto.response.ApolicesAVencerResponse;
+import br.com.banksecure.app.exception.ApoliceNaoEncontradaException;
 import br.com.banksecure.app.exception.ClienteNaoEncontradoException;
 import br.com.banksecure.app.exception.SeguroNaoEncontradoException;
 import br.com.banksecure.app.mapper.ApoliceMapper;
@@ -19,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
 
 import static br.com.banksecure.app.enums.ErrorMessage.CLIENTE_NAO_ENCONTRADO;
 import static br.com.banksecure.app.enums.ErrorMessage.SEGURO_NAO_ENCONTRADO;
@@ -92,5 +96,56 @@ public class ApoliceService {
 
         return mapper.converterParaResponse(apoliceSalva);
 
+    }
+
+    @Transactional
+    public List<ApolicesAVencerResponse> listarApolicesAVencer() {
+        LocalDate dataAtual = LocalDate.now();
+        LocalDate dataLimite = dataAtual.plusYears(1);
+        
+        List<Apolice> apolices = apoliceRepository.findApolicesAVencer(dataAtual, dataLimite);
+        
+        return apolices.stream()
+                .map(this::converterParaApolicesAVencerResponse)
+                .toList();
+    }
+
+    private ApolicesAVencerResponse converterParaApolicesAVencerResponse(Apolice apolice) {
+        long diasParaVencer = Period.between(LocalDate.now(), apolice.getFimVigencia()).getDays();
+        
+        return new ApolicesAVencerResponse(
+                apolice.getId(),
+                apolice.getCliente().getNome(),
+                apolice.getCliente().getCpf(),
+                apolice.getSeguro().getTitulo(),
+                apolice.getValorFinal(),
+                apolice.getFimVigencia(),
+                diasParaVencer
+        );
+    }
+
+    @Transactional
+    public ApoliceResponse renovarApolice(RenovacaoApoliceRequest request) {
+        Apolice apoliceAnterior = apoliceRepository.findById(request.idApolice())
+                .orElseThrow(() -> new ApoliceNaoEncontradaException("Apólice não encontrada"));
+
+        Cliente cliente = apoliceAnterior.getCliente();
+        Seguro seguro = apoliceAnterior.getSeguro();
+
+        // Calcula novo valor com 10% de acréscimo
+        BigDecimal novoValor = apoliceAnterior.getValorFinal()
+                .multiply(BigDecimal.valueOf(1.10))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        Apolice novaApolice = new Apolice();
+        novaApolice.setCliente(cliente);
+        novaApolice.setSeguro(seguro);
+        novaApolice.setValorFinal(novoValor);
+        novaApolice.setInicioVigencia(LocalDate.now());
+        novaApolice.setFimVigencia(LocalDate.now().plusYears(1));
+
+        Apolice apoliceSalva = apoliceRepository.save(novaApolice);
+
+        return mapper.converterParaResponse(apoliceSalva);
     }
 }
