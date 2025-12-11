@@ -12,6 +12,7 @@ import br.com.banksecure.app.mapper.ApoliceMapper;
 import br.com.banksecure.app.repository.ApoliceRepository;
 import br.com.banksecure.app.repository.ClienteRepository;
 import br.com.banksecure.app.repository.SeguroRepository;
+import br.com.banksecure.app.util.ValidarAcesso;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,44 +31,37 @@ public class ApoliceService {
     private final ApoliceMapper mapper;
     private final ClienteRepository clienteRepository;
     private final SeguroRepository seguroRepository;
+    private final ValidarAcesso acesso;
 
-    public ApoliceService(ApoliceRepository apoliceRepository, ApoliceMapper mapper, ClienteRepository clienteRepository, SeguroRepository seguroRepository) {
+
+    public ApoliceService(ApoliceRepository apoliceRepository, ApoliceMapper mapper, ClienteRepository clienteRepository, SeguroRepository seguroRepository, ValidarAcesso acesso) {
         this.apoliceRepository = apoliceRepository;
         this.mapper = mapper;
         this.clienteRepository = clienteRepository;
         this.seguroRepository = seguroRepository;
+        this.acesso = acesso;
     }
 
     @Transactional
-    public BigDecimal calcularValorFinal(ApoliceRequest request){
+    private BigDecimal calcularValorFinal(BigDecimal valorBase, LocalDate dataNascimento){
 
-        Seguro seguro = seguroRepository.findById(request.idSeguro())
-                .orElseThrow(
-                        () -> new SeguroNaoEncontradoException(SEGURO_NAO_ENCONTRADO.getMessage()));
+        BigDecimal taxaFixa = valorBase.multiply(new BigDecimal("0.05"));
+        BigDecimal taxaDeRisco = new BigDecimal("1.10");
+        BigDecimal taxaPorIdade = new BigDecimal("100");
 
-        Cliente cliente = clienteRepository.findById(request.idCliente())
-                .orElseThrow(
-                        () -> new ClienteNaoEncontradoException(CLIENTE_NAO_ENCONTRADO.getMessage()));
+        BigDecimal valorFinal = valorBase.add(taxaFixa);
 
-        BigDecimal taxaFixa = seguro.getValorPremioBase().multiply(BigDecimal.valueOf(0.05));
-
-        BigDecimal valorFinal = seguro.getValorPremioBase().add(taxaFixa);
-
-        BigDecimal taxaDeRisco = BigDecimal.valueOf(1.10);
-
-        int idade = Period.between(cliente.getDataNascimento(),LocalDate.now()).getYears();
-
+        int idade = Period.between(dataNascimento,LocalDate.now()).getYears();
         if(idade>60){
-            valorFinal = valorFinal.add(BigDecimal.valueOf(100));
+            valorFinal = valorFinal.add(taxaPorIdade);
         }
 
         valorFinal = valorFinal.multiply(taxaDeRisco);
 
-
     return valorFinal.setScale(2, RoundingMode.HALF_UP);
     }
 
-    public ApoliceResponse gerarApolice (ApoliceRequest request){
+    public ApoliceResponse gerarApolice (Long funcionarioId, ApoliceRequest request){
         Seguro seguro = seguroRepository.findById(request.idSeguro())
                 .orElseThrow(
                         () -> new SeguroNaoEncontradoException(SEGURO_NAO_ENCONTRADO.getMessage()));
@@ -77,7 +71,10 @@ public class ApoliceService {
                 .orElseThrow(
                         () -> new ClienteNaoEncontradoException(CLIENTE_NAO_ENCONTRADO.getMessage()));
 
-        BigDecimal valorFinal = calcularValorFinal(request);
+        acesso.validarAcesso(funcionarioId);
+
+        BigDecimal valorFinal = calcularValorFinal(seguro.getValorPremioBase(),
+                cliente.getDataNascimento());
 
         Apolice apolice = new Apolice();
         apolice.setCliente(cliente);

@@ -20,8 +20,8 @@ public class ApoliceController {
     }
 
     @PostMapping
-    public ResponseEntity<ApoliceResponse> gerar(@RequestBody @Valid ApoliceRequest request) {
-        ApoliceResponse response = service.gerarApolice(request);
+    public ResponseEntity<ApoliceResponse> gerar(@RequestBody @Valid ApoliceRequest request, @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
+        ApoliceResponse response = service.gerarApolice(funcionarioId, request);
         return ResponseEntity.ok(response);
     }
 }
