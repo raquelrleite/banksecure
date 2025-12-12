@@ -8,7 +8,6 @@ import br.com.banksecure.app.domain.Seguro;
 import br.com.banksecure.app.dto.request.ApoliceRequest;
 import br.com.banksecure.app.dto.request.ApoliceUpdateRequest;
 import br.com.banksecure.app.dto.response.ApoliceResponse;
-import br.com.banksecure.app.enums.ErrorMessage;
 import br.com.banksecure.app.enums.TipoSeguroeBem;
 import br.com.banksecure.app.exception.*;
 import br.com.banksecure.app.mapper.ApoliceMapper;

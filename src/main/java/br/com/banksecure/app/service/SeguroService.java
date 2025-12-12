@@ -17,6 +17,7 @@ import java.util.List;
 import static br.com.banksecure.app.enums.ErrorMessage.SEGURO_JA_EXISTE;
 import static br.com.banksecure.app.enums.ErrorMessage.SEGURO_NAO_ENCONTRADO;
 
+
 @Service
 public class SeguroService {
 

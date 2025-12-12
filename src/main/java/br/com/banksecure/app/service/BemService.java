@@ -64,5 +64,4 @@ public class BemService {
         Bem bemAtualizado = repository.save(bem);
         return mapper.converterParaResponse(bemAtualizado);
     }
-
 }

@@ -4,7 +4,6 @@ import br.com.banksecure.app.dto.request.ClienteRequest;
 import br.com.banksecure.app.dto.response.ClienteResponse;
 import br.com.banksecure.app.service.ClienteService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,13 +19,12 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ResponseEntity<ClienteResponse> cadastrar(@RequestBody @Valid ClienteRequest request) {
-        ClienteResponse cliente = service.cadastrar(request);
-        return ResponseEntity.ok(cliente);
+    public ClienteResponse cadastrar(@RequestBody @Valid ClienteRequest request) {
+        return service.cadastrar(request);
     }
 
     @GetMapping
-    public ResponseEntity<List<ClienteResponse>> listarTodosClientes() {
-        return ResponseEntity.ok(service.listarTodosClientes());
+    public List<ClienteResponse> listarTodosClientes() {
+        return service.listarTodosClientes();
     }
 }
