@@ -1,14 +1,15 @@
 package br.com.banksecure.app.mapper;
 
-import br.com.banksecure.app.domain.entity.Bem;
+import br.com.banksecure.app.domain.Bem;
 import br.com.banksecure.app.dto.request.BemRequest;
 import br.com.banksecure.app.dto.response.BemResponse;
+import br.com.banksecure.app.enums.TipoSeguroeBem;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-06T23:22:32-0300",
+    date = "2025-12-12T18:09:27-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
 )
 @Component
@@ -22,7 +23,9 @@ public class BemMapperImpl implements BemMapper {
 
         Bem bem = new Bem();
 
-        bem.setTipoBem( request.tipoBem() );
+        if ( request.tipo() != null ) {
+            bem.setTipo( Enum.valueOf( TipoSeguroeBem.class, request.tipo() ) );
+        }
         bem.setDescricao( request.descricao() );
 
         return bem;
@@ -35,14 +38,16 @@ public class BemMapperImpl implements BemMapper {
         }
 
         Long id = null;
-        String tipoBem = null;
+        String tipo = null;
         String descricao = null;
 
         id = bem.getId();
-        tipoBem = bem.getTipoBem();
+        if ( bem.getTipo() != null ) {
+            tipo = bem.getTipo().name();
+        }
         descricao = bem.getDescricao();
 
-        BemResponse bemResponse = new BemResponse( id, tipoBem, descricao );
+        BemResponse bemResponse = new BemResponse( id, tipo, descricao );
 
         return bemResponse;
     }

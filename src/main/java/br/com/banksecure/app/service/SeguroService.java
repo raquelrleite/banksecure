@@ -1,6 +1,6 @@
 package br.com.banksecure.app.service;
 
-import br.com.banksecure.app.domain.entity.Seguro;
+import br.com.banksecure.app.domain.Seguro;
 import br.com.banksecure.app.dto.request.SeguroRequest;
 import br.com.banksecure.app.dto.request.SeguroUpdateRequest;
 import br.com.banksecure.app.dto.response.SeguroResponse;

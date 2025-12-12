@@ -1,6 +1,6 @@
 package br.com.banksecure.app.service;
 
-import br.com.banksecure.app.domain.entity.Funcionario;
+import br.com.banksecure.app.domain.Funcionario;
 import br.com.banksecure.app.dto.request.FuncionarioRequest;
 import br.com.banksecure.app.dto.request.LoginRequest;
 import br.com.banksecure.app.dto.response.FuncionarioResponse;
@@ -48,3 +48,4 @@ public class FuncionarioService {
         return mapper.converterParaResponse(funcionario);
     }
 }
+

@@ -1,9 +1,10 @@
 package br.com.banksecure.app.service;
 
-import br.com.banksecure.app.domain.entity.Bem;
+import br.com.banksecure.app.domain.Bem;
 import br.com.banksecure.app.dto.request.BemRequest;
 import br.com.banksecure.app.dto.request.BemUpdateRequest;
 import br.com.banksecure.app.dto.response.BemResponse;
+import br.com.banksecure.app.enums.TipoSeguroeBem;
 import br.com.banksecure.app.exception.BemNaoEncontradoException;
 import br.com.banksecure.app.exception.ClienteNaoEncontradoException;
 import br.com.banksecure.app.mapper.BemMapper;
@@ -52,8 +53,8 @@ public class BemService {
                 .orElseThrow(
                 () -> new BemNaoEncontradoException(BEM_NAO_ENCONTRADO.getMessage()));
 
-        if(request.tipoBem() != null && !request.tipoBem().isBlank()){
-            bem.setTipoBem(request.tipoBem());
+        if(request.tipo() != null && !request.tipo().isBlank()){
+            bem.setTipo(TipoSeguroeBem.valueOf(request.tipo()));
         }
 
         if(request.descricao() != null && !request.descricao().isBlank()){
@@ -63,5 +64,4 @@ public class BemService {
         Bem bemAtualizado = repository.save(bem);
         return mapper.converterParaResponse(bemAtualizado);
     }
-
 }

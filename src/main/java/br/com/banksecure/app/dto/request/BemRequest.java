@@ -8,7 +8,7 @@ public record BemRequest(
         Long clienteId,
 
         @NotBlank(message = "O tipo do bem (ex: Carro, Casa) é obrigatório.")
-        String tipoBem,
+        String tipo,
 
         String descricao) {
 }

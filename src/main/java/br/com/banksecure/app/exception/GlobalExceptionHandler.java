@@ -27,7 +27,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             BemPossuiSeguroException.class,
             ClientePossuiSegVidaException.class,
-            IdadeInvalidaException.class
+            IdadeInvalidaException.class,
+            TipoIncompativelException.class
     })
     public ResponseEntity<ApiErrorResponse> handleBadRequest(RuntimeException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());

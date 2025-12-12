@@ -6,7 +6,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum ErrorMessage {
-
     MENOR_IDADE("Permitido apenas para maiores de 18 anos."),
     MAIOR_QUE_120("Idade excede o limite permitido."),
 
@@ -24,7 +23,8 @@ public enum ErrorMessage {
 
     CLIENTE_POSSUI_SEGVIDA("Cliente já possui Seguro de Vida ativo."),
     BEM_POSSUI_SEGURO("Este bem já possui seguro vigente."),
-    BEM_NAO_PERTENCE_AO_CLIENTE("O bem informado não pertence ao cliente titular da apólice.");
+    BEM_NAO_PERTENCE_AO_CLIENTE("O bem informado não pertence ao cliente titular da apólice."),
+    TIPO_DO_BEM_INCOMPATIVEL("O tipo do seguro não corresponde ao tipo do bem informado.");
 
     private final String message;
 }

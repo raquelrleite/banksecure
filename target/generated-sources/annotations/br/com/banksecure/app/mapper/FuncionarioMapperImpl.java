@@ -1,19 +1,14 @@
 package br.com.banksecure.app.mapper;
 
-import br.com.banksecure.app.domain.entity.Funcionario;
+import br.com.banksecure.app.domain.Funcionario;
 import br.com.banksecure.app.dto.request.FuncionarioRequest;
 import br.com.banksecure.app.dto.response.FuncionarioResponse;
-import br.com.banksecure.app.dto.response.LoginResponse;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-<<<<<<< Updated upstream
-    date = "2025-12-01T15:24:25-0300",
-=======
-    date = "2025-12-06T23:22:32-0300",
->>>>>>> Stashed changes
+    date = "2025-12-12T11:36:42-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
 )
 @Component
@@ -54,20 +49,5 @@ public class FuncionarioMapperImpl implements FuncionarioMapper {
         FuncionarioResponse funcionarioResponse = new FuncionarioResponse( id, nome, cargo, username );
 
         return funcionarioResponse;
-    }
-
-    @Override
-    public LoginResponse converterParaLogin(Funcionario funcionario) {
-        if ( funcionario == null ) {
-            return null;
-        }
-
-        Long id = null;
-
-        id = funcionario.getId();
-
-        LoginResponse loginResponse = new LoginResponse( id );
-
-        return loginResponse;
     }
 }
