@@ -1,8 +1,8 @@
 package br.com.banksecure.app.mapper;
 
-import br.com.banksecure.app.domain.entity.Apolice;
-import br.com.banksecure.app.domain.entity.Cliente;
-import br.com.banksecure.app.domain.entity.Seguro;
+import br.com.banksecure.app.domain.Apolice;
+import br.com.banksecure.app.domain.Cliente;
+import br.com.banksecure.app.domain.Seguro;
 import br.com.banksecure.app.dto.response.ApoliceResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;

@@ -1,27 +1,29 @@
-package br.com.banksecure.app.domain.entity;
+package br.com.banksecure.app.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "seguro")
-public class Seguro {
+@Table(name = "cliente")
+public class Cliente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String titulo;
+    private String nome;
 
-    private String coberturaMinima;
+    @Column(nullable = false, unique = true)
+    private String cpf;
 
     @Column(nullable = false)
-    private BigDecimal valorPremioBase;
+    private LocalDate dataNascimento;
 }

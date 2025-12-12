@@ -9,15 +9,15 @@ import org.hibernate.validator.constraints.br.CPF;
 import java.time.LocalDate;
 
 public record ClienteRequest(
-        @NotBlank(message = "Nome é obrigatório")
+        @NotBlank(message = "O nome do cliente é obrigatório.")
         String nome,
 
-        @NotBlank(message = "CPF é obrigatório")
-        @CPF(message = "CPF inválido")
+        @NotBlank(message = "O número do CPF é obrigatório.")
+        @CPF(message = "CPF informado inválido.")
         String cpf,
 
-        @NotNull(message = "Data de nascimento é obrigatória")
-        @Past(message = "Data de nascimento deve estar no passado")
+        @NotNull(message = "A data de nascimento é obrigatória.")
+        @Past(message = "A data de nascimento deve ser anterior à data de hoje.")
         @JsonFormat(pattern = "dd/MM/yyyy")
         LocalDate dataNascimento) {
 }

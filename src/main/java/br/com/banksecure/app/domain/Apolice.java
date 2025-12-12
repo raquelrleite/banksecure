@@ -1,4 +1,4 @@
-package br.com.banksecure.app.domain.entity;
+package br.com.banksecure.app.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,11 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "apolice")
+@Table(name = "apolice",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"cliente_id", "seguro_id", "bem_id"})
+        }
+)
 public class Apolice {
 
     @Id
@@ -27,6 +31,10 @@ public class Apolice {
     @JoinColumn(name = "seguro_id", nullable = false)
     private Seguro seguro;
 
+    @ManyToOne
+    @JoinColumn(name = "bem_id")
+    private Bem bem;
+
     @Column(nullable = false)
     private BigDecimal valorFinal;
 
@@ -35,6 +43,4 @@ public class Apolice {
 
     @Column(nullable = false)
     private LocalDate fimVigencia;
-
-
 }

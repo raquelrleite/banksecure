@@ -1,6 +1,6 @@
 package br.com.banksecure.app.mapper;
 
-import br.com.banksecure.app.domain.entity.Funcionario;
+import br.com.banksecure.app.domain.Funcionario;
 import br.com.banksecure.app.dto.request.FuncionarioRequest;
 import br.com.banksecure.app.dto.response.FuncionarioResponse;
 import br.com.banksecure.app.dto.response.LoginResponse;
