@@ -53,8 +53,8 @@ public class BemService {
                 .orElseThrow(
                 () -> new BemNaoEncontradoException(BEM_NAO_ENCONTRADO.getMessage()));
 
-        if(request.tipoBem() != null && !request.tipoBem().isBlank()){
-            bem.setTipo(TipoSeguroeBem.valueOf(request.tipoBem()));
+        if(request.tipo() != null && !request.tipo().isBlank()){
+            bem.setTipo(TipoSeguroeBem.valueOf(request.tipo()));
         }
 
         if(request.descricao() != null && !request.descricao().isBlank()){

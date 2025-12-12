@@ -8,6 +8,7 @@ import br.com.banksecure.app.domain.Seguro;
 import br.com.banksecure.app.dto.request.ApoliceRequest;
 import br.com.banksecure.app.dto.request.ApoliceUpdateRequest;
 import br.com.banksecure.app.dto.response.ApoliceResponse;
+import br.com.banksecure.app.enums.ErrorMessage;
 import br.com.banksecure.app.enums.TipoSeguroeBem;
 import br.com.banksecure.app.exception.*;
 import br.com.banksecure.app.mapper.ApoliceMapper;
@@ -78,6 +79,9 @@ public class ApoliceService {
             }
             if (repository.existsByBemId(bem.getId())) {
                 throw new BemPossuiSeguroException(BEM_POSSUI_SEGURO.getMessage());
+            }
+            if (seguro.getTipo() != bem.getTipo()) {
+                throw new TipoIncompativelException(TIPO_DO_BEM_INCOMPATIVEL.getMessage());
             }
         }
 
@@ -180,5 +184,14 @@ public class ApoliceService {
     public void excluir(Long funcionarioId, Long apoliceId) {
         acesso.validarAcesso(funcionarioId);
         repository.deleteById(apoliceId);
+    }
+
+
+    public List<ApoliceResponse> apolices(Long funcionarioId) {
+        acesso.validarAcesso(funcionarioId);
+       return repository.findAll()
+               .stream()
+               .map(mapper::converterParaResponse)
+               .toList();
     }
 }

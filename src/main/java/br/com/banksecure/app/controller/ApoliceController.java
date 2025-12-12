@@ -5,10 +5,8 @@ import br.com.banksecure.app.dto.request.ApoliceUpdateRequest;
 import br.com.banksecure.app.dto.response.ApoliceResponse;
 import br.com.banksecure.app.service.ApoliceService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -22,9 +20,10 @@ public class ApoliceController {
     }
 
     @PostMapping
-    public ApoliceResponse gerar(@RequestBody @Valid ApoliceRequest request) {
-        return service.gerarApolice(request);
+    public ApoliceResponse gerar(@RequestBody @Valid ApoliceRequest request, @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
+        return service.gerarApolice(request, funcionarioId);
     }
+
     @GetMapping
     public List<ApoliceResponse> apolicesAvencer(
             @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
@@ -50,5 +49,10 @@ public class ApoliceController {
     public void excluir(@PathVariable Long apoliceId,
                         @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
         service.excluir(funcionarioId, apoliceId);
+    }
+
+    @GetMapping("lista")
+    public List<ApoliceResponse> apolices(@RequestHeader("X-Funcionario-Id") Long funcionarioId) {
+        return service.apolices(funcionarioId);
     }
 }

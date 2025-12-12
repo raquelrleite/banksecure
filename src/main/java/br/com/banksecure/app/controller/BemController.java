@@ -4,10 +4,6 @@ import br.com.banksecure.app.dto.request.BemRequest;
 import br.com.banksecure.app.dto.request.BemUpdateRequest;
 import br.com.banksecure.app.dto.response.BemResponse;
 import br.com.banksecure.app.service.BemService;
-import br.com.banksecure_v1.app.dto.request.BemRequest;
-import br.com.banksecure_v1.app.dto.request.BemUpdateRequest;
-import br.com.banksecure_v1.app.dto.response.BemResponse;
-import br.com.banksecure_v1.app.service.BemService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
