@@ -1,0 +1,28 @@
+meta {
+  name: cadastrarCelular
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/bem
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  {
+    "clienteId": 1,
+    "tipo": "CELULAR",
+    "descricao": "Nokia 3310"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

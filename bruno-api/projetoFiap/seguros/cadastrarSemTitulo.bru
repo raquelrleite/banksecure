@@ -1,7 +1,7 @@
 meta {
   name: cadastrarSemTitulo
   type: http
-  seq: 2
+  seq: 5
 }
 
 post {
@@ -11,10 +11,11 @@ post {
 }
 
 body:json {
-  { "titulo": "",
-    "coberturaMinima": "Só a fechadura",
-     "valorPremioBase":"30"
-  
+  {
+    "titulo": "",
+    "coberturaMinima": "Morte Natural",
+    "valorPremioBase": 100.00,
+    "tipo": "VIDA" 
   }
 }
 

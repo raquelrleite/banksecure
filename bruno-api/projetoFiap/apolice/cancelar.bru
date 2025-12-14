@@ -1,18 +1,17 @@
 meta {
-  name: delete
+  name: cancelar
   type: http
-  seq: 10
+  seq: 13
 }
 
-delete {
-  url: http://localhost:8080/seguros/1
+put {
+  url: http://localhost:8080/apolices/cancelar/1
   body: json
   auth: inherit
 }
 
 headers {
   X-Funcionario-Id: 1
-  ~X-Funcionario-Id: 2
 }
 
 settings {

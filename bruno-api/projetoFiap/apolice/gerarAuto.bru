@@ -1,0 +1,28 @@
+meta {
+  name: gerarAuto
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/apolices
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  { 
+    "clienteId": 1,
+    "seguroId": 3,
+    "bemId" : 2
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

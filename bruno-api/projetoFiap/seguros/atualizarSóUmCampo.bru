@@ -1,7 +1,7 @@
 meta {
   name: atualizarSóUmCampo
   type: http
-  seq: 5
+  seq: 8
 }
 
 patch {
@@ -15,10 +15,11 @@ headers {
 }
 
 body:json {
-  { "titulo": "",
-    "coberturaMinima": "Só a maçaneta",
-     "valorPremioBase":"600.00"
-  
+  {
+    "titulo": "",
+    "coberturaMinima": "",
+    "valorPremioBase": 600.00,
+    "tipo": "" 
   }
 }
 
