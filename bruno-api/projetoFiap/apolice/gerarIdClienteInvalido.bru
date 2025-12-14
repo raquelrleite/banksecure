@@ -1,0 +1,28 @@
+meta {
+  name: gerarIdClienteInvalido
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:8080/apolices
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  {
+    "clienteId": 10,
+    "seguroId": 2,
+    "bemId": 1
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

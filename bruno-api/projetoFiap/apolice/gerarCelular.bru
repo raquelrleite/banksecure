@@ -1,0 +1,28 @@
+meta {
+  name: gerarCelular
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/apolices
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  { 
+    "clienteId": 1,
+    "seguroId": 4,
+    "bemId" : 3
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

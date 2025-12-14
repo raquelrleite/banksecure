@@ -1,7 +1,7 @@
 meta {
-  name: cadastrarComValorNegativo
+  name: cadastrarAuto
   type: http
-  seq: 7
+  seq: 3
 }
 
 post {
@@ -17,10 +17,10 @@ headers {
 
 body:json {
   {
-    "titulo": "Seguro Vida Plus",
-    "coberturaMinima": "Morte Natural",
-    "valorPremioBase": -2100.00,
-    "tipo": "VIDA" 
+    "titulo": "Seguro Auto Total",
+    "coberturaMinima": "Colisão, incêndio, roubo e danos a terceiros.",
+    "valorPremioBase": 1200.00,
+    "tipo": "AUTO"
   }
 }
 

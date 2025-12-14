@@ -1,0 +1,28 @@
+meta {
+  name: gerarIdSemBem
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://localhost:8080/apolices
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  {
+    "clienteId": 1,
+    "seguroId": 2,
+    "bemId": ""
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

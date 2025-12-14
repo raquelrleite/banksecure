@@ -1,18 +1,24 @@
 meta {
-  name: delete
+  name: gerarVida
   type: http
-  seq: 10
+  seq: 1
 }
 
-delete {
-  url: http://localhost:8080/seguros/1
+post {
+  url: http://localhost:8080/apolices
   body: json
   auth: inherit
 }
 
 headers {
   X-Funcionario-Id: 1
-  ~X-Funcionario-Id: 2
+}
+
+body:json {
+  {
+    "clienteId": 1,
+    "seguroId": 1
+  }
 }
 
 settings {

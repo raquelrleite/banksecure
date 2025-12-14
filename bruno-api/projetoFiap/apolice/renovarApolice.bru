@@ -1,0 +1,28 @@
+meta {
+  name: renovarApolice
+  type: http
+  seq: 11
+}
+
+post {
+  url: http://localhost:8080/apolices/renovacao/1
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  {
+    "clienteId": 1,
+    "seguroId": 1,
+    "bemId": 1
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

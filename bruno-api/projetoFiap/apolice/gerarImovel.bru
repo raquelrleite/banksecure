@@ -1,0 +1,28 @@
+meta {
+  name: gerarImovel
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/apolices
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  { 
+    "clienteId": 1,
+    "seguroId": 2,
+    "bemId" : 1
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,7 +1,7 @@
 meta {
   name: cadastrarSemPremioBase
   type: http
-  seq: 3
+  seq: 6
 }
 
 post {
@@ -11,10 +11,11 @@ post {
 }
 
 body:json {
-  { "titulo": "Seguro Residencial",
-    "coberturaMinima": "Só a fechadura",
-     "valorPremioBase":""
-  
+  {
+    "titulo": "Seguro Vida Plus",
+    "coberturaMinima": "Morte Natural",
+    "valorPremioBase": "",
+    "tipo": "VIDA" 
   }
 }
 

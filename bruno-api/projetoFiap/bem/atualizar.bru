@@ -1,0 +1,27 @@
+meta {
+  name: atualizar
+  type: http
+  seq: 4
+}
+
+patch {
+  url: http://localhost:8080/bem/1
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  {
+    "tipo": "CELULAR",
+    "descricao": "Samsung pocket"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

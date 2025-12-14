@@ -1,0 +1,28 @@
+meta {
+  name: cadastrarImovel
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/bem
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  {
+    "clienteId": 1,
+    "tipo": "RESIDENCIAL",
+    "descricao": "Rua Localhost, nº 127.0.0.1, Apto 404"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

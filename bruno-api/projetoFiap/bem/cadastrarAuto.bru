@@ -1,0 +1,28 @@
+meta {
+  name: cadastrarAuto
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/bem
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  {
+    "clienteId": 1,
+    "tipo": "AUTO",
+    "descricao": "Fiat Uno com escada no teto"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,29 @@
+meta {
+  name: atualizar
+  type: http
+  seq: 12
+}
+
+patch {
+  url: http://localhost:8080/apolices/1
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-Funcionario-Id: 1
+}
+
+body:json {
+  {
+    "inicioVigencia": "10/10/2024",
+    "fimVigencia": "10/12/2025",
+    "status": "ATIVA"
+  
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
