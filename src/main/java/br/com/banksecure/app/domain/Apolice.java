@@ -1,7 +1,9 @@
 package br.com.banksecure.app.domain;
 
+import br.com.banksecure.app.enums.ApoliceStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,12 +13,9 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
-@Table(name = "apolice",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"cliente_id", "seguro_id", "bem_id"})
-        }
-)
+@Table(name = "apolice")
 public class Apolice {
 
     @Id
@@ -43,4 +42,8 @@ public class Apolice {
 
     @Column(nullable = false)
     private LocalDate fimVigencia;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ApoliceStatus status;
 }

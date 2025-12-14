@@ -1,0 +1,29 @@
+# --- Maven (Compilação e Dependências) ---
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# --- IntelliJ IDEA (Arquivos da IDE) ---
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# --- Eclipse (Arquivos da IDE) ---
+.classpath
+.project
+.settings/
+.springBeans
+bin/
+
+# --- Visual Studio Code ---
+.vscode/
+
+# --- Logs e Arquivos Temporários ---
+logs/
+*.log
+*.tmp
+
+# --- Sistema Operacional (Lixo do Mac/Windows) ---
+.DS_Store
+Thumbs.db

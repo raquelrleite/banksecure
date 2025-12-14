@@ -1,7 +1,9 @@
 package br.com.banksecure.app.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 
+@Builder
 public record FuncionarioRequest(
         @NotBlank(message = "Nome é obrigatório.")
         String nome,
