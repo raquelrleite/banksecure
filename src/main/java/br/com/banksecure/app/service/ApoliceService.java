@@ -8,6 +8,7 @@ import br.com.banksecure.app.domain.Seguro;
 import br.com.banksecure.app.dto.request.ApoliceRequest;
 import br.com.banksecure.app.dto.request.ApoliceUpdateRequest;
 import br.com.banksecure.app.dto.response.ApoliceResponse;
+import br.com.banksecure.app.enums.ApoliceStatus;
 import br.com.banksecure.app.enums.TipoSeguroeBem;
 import br.com.banksecure.app.exception.*;
 import br.com.banksecure.app.mapper.ApoliceMapper;
@@ -47,38 +48,39 @@ public class ApoliceService {
         this.bemRepository = bemRepository;
     }
 
-    public ApoliceResponse gerarApolice (ApoliceRequest request, Long funcionarioId){
+    public ApoliceResponse gerarApolice(ApoliceRequest request, Long funcionarioId) {
         acesso.validarAcesso(funcionarioId);
 
         Cliente cliente = clienteRepository.findById(request.clienteId())
-                .orElseThrow(
-                        () -> new ClienteNaoEncontradoException(CLIENTE_NAO_ENCONTRADO.getMessage()));
+                .orElseThrow(() -> new ClienteNaoEncontradoException(CLIENTE_NAO_ENCONTRADO.getMessage()));
 
         Seguro seguro = seguroRepository.findById(request.seguroId())
-                .orElseThrow(
-                        () -> new SeguroNaoEncontradoException(SEGURO_NAO_ENCONTRADO.getMessage()));
-
+                .orElseThrow(() -> new SeguroNaoEncontradoException(SEGURO_NAO_ENCONTRADO.getMessage()));
 
         Bem bem = null;
-        if (request.bemId() != null) {
-            bem = bemRepository.findById(request.bemId())
-                    .orElseThrow(() -> new BemNaoEncontradoException(BEM_NAO_ENCONTRADO.getMessage()));
-        }
-        if (seguro.getTipo() == TipoSeguroeBem.VIDA) {
+
+        boolean isSeguroVida = seguro.getTipo() == TipoSeguroeBem.VIDA;
+
+        if (isSeguroVida) {
+
             if (repository.existsByClienteIdAndSeguro_Tipo(request.clienteId(), TipoSeguroeBem.VIDA)) {
                 throw new ClientePossuiSegVidaException(CLIENTE_POSSUI_SEGVIDA.getMessage());
             }
-            bem = null;
         } else {
-            if (bem == null) {
+            if (request.bemId() == null) {
                 throw new BemNaoEncontradoException(BEM_NAO_ENCONTRADO.getMessage());
             }
+            bem = bemRepository.findById(request.bemId())
+                    .orElseThrow(() -> new BemNaoEncontradoException(BEM_NAO_ENCONTRADO.getMessage()));
+
             if (!bem.getCliente().getId().equals(cliente.getId())) {
                 throw new AcessoNegadoException(BEM_NAO_PERTENCE_AO_CLIENTE.getMessage());
             }
+
             if (repository.existsByBemId(bem.getId())) {
                 throw new BemPossuiSeguroException(BEM_POSSUI_SEGURO.getMessage());
             }
+
             if (seguro.getTipo() != bem.getTipo()) {
                 throw new TipoIncompativelException(TIPO_DO_BEM_INCOMPATIVEL.getMessage());
             }
@@ -91,17 +93,16 @@ public class ApoliceService {
         apolice.setSeguro(seguro);
         apolice.setBem(bem);
         apolice.setValorFinal(valorFinal);
-
+        apolice.setStatus(ApoliceStatus.ATIVA);
         apolice.setInicioVigencia(LocalDate.now());
         apolice.setFimVigencia(LocalDate.now().plusYears(1));
 
         Apolice apoliceSalva = repository.save(apolice);
 
         return mapper.converterParaResponse(apoliceSalva);
-
     }
 
-    private BigDecimal calcularValorFinal(Seguro seguro, Cliente cliente){
+    private BigDecimal calcularValorFinal(Seguro seguro, Cliente cliente) {
 
         BigDecimal taxaFixa = new BigDecimal("0.05");
         BigDecimal taxaDeRisco = new BigDecimal("1.10");
@@ -118,18 +119,38 @@ public class ApoliceService {
         } return valorInicial.multiply(taxaDeRisco).setScale(2, RoundingMode.HALF_UP);
     }
 
+    private Apolice atualizarStatusSeVencida(Apolice apolice) {
+        LocalDate hoje = LocalDate.now();
+
+        if (hoje.isAfter(apolice.getFimVigencia())) {
+            if (apolice.getStatus() != ApoliceStatus.EXPIRADA) {
+                apolice.setStatus(ApoliceStatus.EXPIRADA);
+                repository.save(apolice);
+            }
+        } else {
+            if (apolice.getStatus() == ApoliceStatus.EXPIRADA) {
+                apolice.setStatus(ApoliceStatus.ATIVA);
+                repository.save(apolice);
+            }
+        }
+        return apolice;
+    }
+
     public List<ApoliceResponse> apolicesAvencer(Long funcionarioId) {
         acesso.validarAcesso(funcionarioId);
 
-        LocalDate hoje = LocalDate.now().minusDays(1);
-        LocalDate dataLimite = hoje.plusDays(60);
+        LocalDate ontem = LocalDate.now().minusDays(1);
+        LocalDate diaAposLimite = LocalDate.now().plusDays(31);
 
         return repository.findAll()
                 .stream()
+                .filter(apolice ->
+                        apolice.getStatus() == ApoliceStatus.ATIVA)
+                .map(this::atualizarStatusSeVencida)
                 .map(mapper::converterParaResponse)
-                .filter(apolice
-                        -> apolice.fimVigencia().isAfter(hoje) &&
-                        apolice.fimVigencia().isBefore(dataLimite))
+                .filter(apolice ->
+                        apolice.fimVigencia().isAfter(ontem) &&
+                                apolice.fimVigencia().isBefore(diaAposLimite))
                 .toList();
     }
 
@@ -142,13 +163,30 @@ public class ApoliceService {
                 .orElseThrow(
                         () -> new ApoliceNaoEncontradaException(APOLICE_NAO_ENCONTRADA.getMessage()));
 
-        Apolice novaApolice = new Apolice();
+        if (apoliceAntiga.getStatus() == ApoliceStatus.CANCELADA ||
+                apoliceAntiga.getStatus() == ApoliceStatus.RENOVADA) {
+            throw new RegraApoliceException(APOLICE_NAO_PODE_SER_RENOVADA.getMessage() + apoliceAntiga.getStatus());
+        }
+        apoliceAntiga.setStatus(ApoliceStatus.RENOVADA);
 
+        repository.save(apoliceAntiga);
+
+        Apolice novaApolice = new Apolice();
         novaApolice.setCliente(apoliceAntiga.getCliente());
         novaApolice.setSeguro(apoliceAntiga.getSeguro());
+        novaApolice.setBem(apoliceAntiga.getBem());
 
-        novaApolice.setInicioVigencia(LocalDate.now());
-        novaApolice.setFimVigencia(LocalDate.now().plusYears(1));
+        LocalDate inicioVigencia;
+
+        if (apoliceAntiga.getFimVigencia().isAfter(LocalDate.now())) {
+            inicioVigencia = apoliceAntiga.getFimVigencia().plusDays(1);
+        } else {
+            inicioVigencia = LocalDate.now();
+        }
+
+        novaApolice.setInicioVigencia(inicioVigencia);
+        novaApolice.setFimVigencia(inicioVigencia.plusYears(1));
+        novaApolice.setStatus(ApoliceStatus.ATIVA);
 
         BigDecimal novoValor = calcularValorFinal(apoliceAntiga.getSeguro(), apoliceAntiga.getCliente());
         novaApolice.setValorFinal(novoValor);
@@ -174,23 +212,36 @@ public class ApoliceService {
             apolice.setFimVigencia(request.fimVigencia());
         }
 
+        if (request.status() != null) {
+            apolice.setStatus(request.status());
+        }
+
+        atualizarStatusSeVencida(apolice);
+
         repository.save(apolice);
 
         return mapper.converterParaResponse(apolice);
     }
 
     @Transactional
-    public void excluir(Long funcionarioId, Long apoliceId) {
+    public void cancelar(Long apoliceId, Long funcionarioId) {
         acesso.validarAcesso(funcionarioId);
-        repository.deleteById(apoliceId);
-    }
 
+        Apolice apolice = repository.findById(apoliceId)
+                .orElseThrow(
+                        () -> new ApoliceNaoEncontradaException(APOLICE_NAO_ENCONTRADA.getMessage()));
+
+        apolice.setStatus(ApoliceStatus.CANCELADA);
+
+        repository.save(apolice);
+    }
 
     public List<ApoliceResponse> apolices(Long funcionarioId) {
         acesso.validarAcesso(funcionarioId);
-       return repository.findAll()
-               .stream()
-               .map(mapper::converterParaResponse)
-               .toList();
+        return repository.findAll()
+                .stream()
+                .map(this::atualizarStatusSeVencida)
+                .map(mapper::converterParaResponse)
+                .toList();
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-12T11:36:42-0300",
+    date = "2025-12-14T02:07:14-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
 )
 @Component
@@ -20,14 +20,14 @@ public class FuncionarioMapperImpl implements FuncionarioMapper {
             return null;
         }
 
-        Funcionario funcionario = new Funcionario();
+        Funcionario.FuncionarioBuilder funcionario = Funcionario.builder();
 
-        funcionario.setNome( request.nome() );
-        funcionario.setCargo( request.cargo() );
-        funcionario.setUsername( request.username() );
-        funcionario.setPassword( request.password() );
+        funcionario.nome( request.nome() );
+        funcionario.cargo( request.cargo() );
+        funcionario.username( request.username() );
+        funcionario.password( request.password() );
 
-        return funcionario;
+        return funcionario.build();
     }
 
     @Override
@@ -36,18 +36,8 @@ public class FuncionarioMapperImpl implements FuncionarioMapper {
             return null;
         }
 
-        Long id = null;
-        String nome = null;
-        String cargo = null;
-        String username = null;
+        FuncionarioResponse.FuncionarioResponseBuilder funcionarioResponse = FuncionarioResponse.builder();
 
-        id = funcionario.getId();
-        nome = funcionario.getNome();
-        cargo = funcionario.getCargo();
-        username = funcionario.getUsername();
-
-        FuncionarioResponse funcionarioResponse = new FuncionarioResponse( id, nome, cargo, username );
-
-        return funcionarioResponse;
+        return funcionarioResponse.build();
     }
 }

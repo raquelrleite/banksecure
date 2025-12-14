@@ -4,9 +4,11 @@ import br.com.banksecure.app.enums.TipoSeguroeBem;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Builder;
 
 import java.math.BigDecimal;
 
+@Builder
 public record SeguroRequest(
         @NotBlank(message = "O título do seguro é obrigatório.")
         String titulo,

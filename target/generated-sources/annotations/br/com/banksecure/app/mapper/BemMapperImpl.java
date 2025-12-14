@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-12T18:09:27-0300",
+    date = "2025-12-14T02:07:14-0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
 )
 @Component
@@ -21,14 +21,14 @@ public class BemMapperImpl implements BemMapper {
             return null;
         }
 
-        Bem bem = new Bem();
+        Bem.BemBuilder bem = Bem.builder();
 
         if ( request.tipo() != null ) {
-            bem.setTipo( Enum.valueOf( TipoSeguroeBem.class, request.tipo() ) );
+            bem.tipo( Enum.valueOf( TipoSeguroeBem.class, request.tipo() ) );
         }
-        bem.setDescricao( request.descricao() );
+        bem.descricao( request.descricao() );
 
-        return bem;
+        return bem.build();
     }
 
     @Override
@@ -37,18 +37,8 @@ public class BemMapperImpl implements BemMapper {
             return null;
         }
 
-        Long id = null;
-        String tipo = null;
-        String descricao = null;
+        BemResponse.BemResponseBuilder bemResponse = BemResponse.builder();
 
-        id = bem.getId();
-        if ( bem.getTipo() != null ) {
-            tipo = bem.getTipo().name();
-        }
-        descricao = bem.getDescricao();
-
-        BemResponse bemResponse = new BemResponse( id, tipo, descricao );
-
-        return bemResponse;
+        return bemResponse.build();
     }
 }

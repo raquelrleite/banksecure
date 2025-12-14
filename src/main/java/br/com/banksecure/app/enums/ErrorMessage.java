@@ -21,10 +21,11 @@ public enum ErrorMessage {
     CPF_JA_EXISTE("CPF já cadastrado."),
     SEGURO_JA_EXISTE("Já existe um seguro cadastrado com este título."),
 
+
     CLIENTE_POSSUI_SEGVIDA("Cliente já possui Seguro de Vida ativo."),
     BEM_POSSUI_SEGURO("Este bem já possui seguro vigente."),
     BEM_NAO_PERTENCE_AO_CLIENTE("O bem informado não pertence ao cliente titular da apólice."),
-    TIPO_DO_BEM_INCOMPATIVEL("O tipo do seguro não corresponde ao tipo do bem informado.");
-
+    TIPO_DO_BEM_INCOMPATIVEL("O tipo do seguro não corresponde ao tipo do bem informado."),
+    APOLICE_NAO_PODE_SER_RENOVADA("Esta apólice não pode ser renovada pois está: ");
     private final String message;
 }

@@ -30,7 +30,7 @@ public class ApoliceController {
         return service.apolicesAvencer(funcionarioId);
     }
 
-    @PostMapping("renovacao/{apoliceId}")
+    @PostMapping("renovar/{apoliceId}")
     public ApoliceResponse renovar(
             @PathVariable Long apoliceId,
             @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
@@ -45,10 +45,10 @@ public class ApoliceController {
 
     }
 
-    @DeleteMapping("{apoliceId}")
-    public void excluir(@PathVariable Long apoliceId,
+    @PutMapping("cancelar/{apoliceId}")
+    public void cancelar(@PathVariable Long apoliceId,
                         @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
-        service.excluir(funcionarioId, apoliceId);
+        service.cancelar(funcionarioId, apoliceId);
     }
 
     @GetMapping("lista")
