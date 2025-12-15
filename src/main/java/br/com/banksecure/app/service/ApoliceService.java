@@ -156,7 +156,6 @@ public class ApoliceService {
 
     @Transactional
     public ApoliceResponse renovar(Long funcionarioId, Long apoliceId) {
-
         acesso.validarAcesso(funcionarioId);
 
         Apolice apoliceAntiga = repository.findById(apoliceId)

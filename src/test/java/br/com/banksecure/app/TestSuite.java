@@ -1,5 +1,6 @@
 package br.com.banksecure.app;
 
+import br.com.banksecure.app.controller.*;
 import br.com.banksecure.app.service.*;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
@@ -10,7 +11,12 @@ import org.junit.platform.suite.api.Suite;
         BemServiceTest.class,
         ClienteServiceTest.class,
         FuncionarioServiceTest.class,
-        SeguroServiceTest.class
+        SeguroServiceTest.class,
+        ApoliceControllerTest.class,
+        BemControllerTest.class,
+        ClienteControllerTest.class,
+        FuncionarioControllerTest.class,
+        SeguroControllerTest.class,
 })
 public class TestSuite {
 

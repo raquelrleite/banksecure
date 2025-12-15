@@ -31,19 +31,19 @@ public class SeguroController {
         return service.listarTodos();
     }
 
-    @PatchMapping("{id}")
+    @PatchMapping("{seguroId}")
     public SeguroResponse atualizar(
-            @PathVariable Long id,
+            @PathVariable Long seguroId,
             @RequestBody @Valid SeguroUpdateRequest request,
             @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
-        return service.atualizar(id, request, funcionarioId);
+        return service.atualizar(seguroId, request, funcionarioId);
     }
 
-    @DeleteMapping("{idSeguro}")
-    public void excluir(@PathVariable Long idSeguro,
+    @DeleteMapping("{seguroId}")
+    public void excluir(@PathVariable Long seguroId,
                         @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
 
-        service.excluir(idSeguro, funcionarioId);
+        service.excluir(seguroId, funcionarioId);
     }
 
 
