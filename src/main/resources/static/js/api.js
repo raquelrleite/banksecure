@@ -14,6 +14,34 @@ function formatarMoeda(valor) {
     }).format(valor);
 }
 
+// Função para formatar CPF (xxx.xxx.xxx-xx)
+function formatarCPF(cpf) {
+    if (!cpf) return '';
+
+    // Remove caracteres não numéricos
+    const apenasNumeros = cpf.replace(/\D/g, '');
+
+    // Se tiver mais de 11 dígitos, pega apenas os 11 primeiros
+    const cpfLimitado = apenasNumeros.slice(0, 11);
+
+    // Formata no padrão xxx.xxx.xxx-xx
+    return cpfLimitado.replace(/(\d{3})(\d{3})(\d{3})(\d{2})?/, (match, p1, p2, p3, p4) => {
+        if (p4) {
+            return `${p1}.${p2}.${p3}-${p4}`;
+        } else if (p3) {
+            return `${p1}.${p2}.${p3}`;
+        } else if (p2) {
+            return `${p1}.${p2}`;
+        }
+        return p1;
+    });
+}
+
+// Função para limpar CPF (remove formatação)
+function limparCPF(cpf) {
+    return cpf.replace(/\D/g, '');
+}
+
 const storage = {
     setFuncionario(funcionario) {
         console.log('Salvando funcionário na sessão:', funcionario);
@@ -167,6 +195,13 @@ async function deletarSeguro(id) {
     });
 }
 
+async function atualizarSeguro(id, data) {
+    return await apiFetch(`/seguros/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data)
+    });
+}
+
 // Cotação
 function calcularCotacao(valorPremioBase, dataNascimento) {
     const taxaFixa = 0.05;
@@ -226,9 +261,11 @@ async function atualizarApolice(apoliceId, data) {
     });
 }
 
-async function deletarApolice(apoliceId) {
-    return await apiFetch(`/apolices/${apoliceId}`, {
-        method: 'DELETE'
+async function cancelarApolice(apoliceId) {
+    // Nota: O backend tem uma inversão de parâmetros internamente,
+    // mas o frontend envia apenas via URL, então funciona corretamente
+    return await apiFetch(`/apolices/cancelar/${apoliceId}`, {
+        method: 'PUT'
     });
 }
 
@@ -266,16 +303,19 @@ export {
     listarSeguros,
     cadastrarSeguro,
     deletarSeguro,
+    atualizarSeguro,
     gerarApolice,
     listarApolices,
     apolicesAvencer,
     renovarApolice,
     atualizarApolice,
-    deletarApolice,
+    cancelarApolice,
     listarBens,
     cadastrarBem,
     atualizarBem,
     calcularCotacao,
-    formatarMoeda
+    formatarMoeda,
+    formatarCPF,
+    limparCPF
 };
 

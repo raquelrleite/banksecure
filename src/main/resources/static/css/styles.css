@@ -184,6 +184,35 @@ html, body {
     width: auto;
 }
 
+.btn-icon {
+    padding: 6px 10px;
+    font-size: 16px;
+    width: auto;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+    transform: scale(1.15);
+    opacity: 0.8;
+}
+
+.btn-icon.btn-edit {
+    background-color: transparent;
+    color: var(--info);
+}
+
+.btn-icon.btn-delete {
+    background-color: transparent;
+    color: var(--error);
+}
+
 .btn-edit {
     background-color: var(--info);
     color: var(--white);
@@ -518,6 +547,14 @@ tbody tr:hover {
     justify-content: center;
 }
 
+th:last-child {
+    text-align: center;
+}
+
+td.actions {
+    text-align: center;
+}
+
 .empty-state {
     text-align: center;
     padding: 40px 20px;
@@ -598,6 +635,45 @@ tbody tr:hover {
 
 .modal-close:hover {
     color: var(--primary);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.form-buttons button {
+    flex: 1;
+    padding: 10px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.form-buttons .btn-primary {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.form-buttons .btn-primary:hover {
+    background-color: #b20000;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.form-buttons .btn-delete {
+    background-color: var(--error);
+    color: var(--white);
+}
+
+.form-buttons .btn-delete:hover {
+    background-color: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 /* ========================================

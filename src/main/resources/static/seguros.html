@@ -97,6 +97,44 @@
                     </div>
                 </div>
 
+                <div id="modal-editar-seguro" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Editar Seguro</h2>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <form id="form-editar-seguro">
+                            <input type="hidden" id="seguro-id-edit" name="id">
+                            <div class="form-group">
+                                <label>Nome do Seguro</label>
+                                <input type="text" id="titulo-edit" name="titulo" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Cobertura Mínima</label>
+                                <textarea id="cobertura-edit" name="coberturaMinima" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Valor Prêmio Base (R$)</label>
+                                <input type="number" id="valor-edit" name="valorPremioBase" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo</label>
+                                <select id="tipo-edit" name="tipo" required disabled>
+                                    <option value="VIDA">Vida</option>
+                                    <option value="AUTO">Automóvel</option>
+                                    <option value="RESIDENCIAL">Residencial</option>
+                                    <option value="CELULAR">Celular</option>
+                                </select>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                                <button type="button" class="btn btn-delete" onclick="deletarSeguroModal()">Deletar Seguro</button>
+                            </div>
+                        </form>
+                        <div id="msg-editar-seguro" class="status-message"></div>
+                    </div>
+                </div>
+
                 <div class="table-container">
                     <table>
                         <thead>
@@ -128,6 +166,7 @@
             listarSeguros,
             cadastrarSeguro,
             deletarSeguro,
+            atualizarSeguro,
             formatarMoeda
         } from './js/api.js';
         import { inicializarMenuHamburger } from './js/menu.js';
@@ -141,6 +180,10 @@
         const sidebar = document.querySelector('#sidebar');
         const modal = document.querySelector('#modal-seguro');
         const modalClose = document.querySelector('.modal-close');
+        const modalEditarSeguro = document.querySelector('#modal-editar-seguro');
+        const modalEditarClose = modalEditarSeguro.querySelector('.modal-close');
+        const formEditarSeguro = document.querySelector('#form-editar-seguro');
+        const msgEditarSeguro = document.querySelector('#msg-editar-seguro');
 
         document.addEventListener('DOMContentLoaded', () => {
             try {
@@ -178,6 +221,42 @@
             if (e.target === modal) modal.classList.remove('open');
         });
 
+        // Event listeners do modal de edição
+        modalEditarClose.addEventListener('click', () => modalEditarSeguro.classList.remove('open'));
+        modalEditarSeguro.addEventListener('click', (e) => {
+            if (e.target === modalEditarSeguro) modalEditarSeguro.classList.remove('open');
+        });
+
+        formEditarSeguro.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const seguroId = document.querySelector('#seguro-id-edit').value;
+            const titulo = document.querySelector('#titulo-edit').value;
+            const coberturaMinima = document.querySelector('#cobertura-edit').value;
+            const valorPremioBase = document.querySelector('#valor-edit').value;
+
+            try {
+                msgEditarSeguro.textContent = 'Atualizando...';
+                msgEditarSeguro.className = 'status-message info';
+
+                await atualizarSeguro(seguroId, {
+                    titulo,
+                    coberturaMinima,
+                    valorPremioBase: parseFloat(valorPremioBase)
+                });
+
+                msgEditarSeguro.textContent = 'Seguro atualizado com sucesso!';
+                msgEditarSeguro.className = 'status-message success';
+
+                setTimeout(() => {
+                    modalEditarSeguro.classList.remove('open');
+                    carregarSeguros();
+                }, 1500);
+            } catch (error) {
+                msgEditarSeguro.textContent = error.message;
+                msgEditarSeguro.className = 'status-message error';
+            }
+        });
+
         formSeguro.addEventListener('submit', async (e) => {
             e.preventDefault();
             const titulo = formSeguro.querySelector('input[name="titulo"]').value;
@@ -211,7 +290,7 @@
                 }
                 segurosList.innerHTML = seguros.map(s => {
                     let row = `
-                        <tr>
+                        <tr data-seguro-id="${s.id}" data-titulo="${s.titulo}" data-tipo="${s.tipo}" data-cobertura="${s.coberturaMinima || ''}" data-valor="${s.valorPremioBase}">
                             <td>${s.id}</td>
                             <td>${s.titulo}</td>
                             <td>${s.tipo}</td>
@@ -221,7 +300,8 @@
                     if (estaAutenticado) {
                         row += `
                             <td class="actions">
-                                <button class="btn btn-small btn-delete" onclick="excluirSeguro(${s.id})">Deletar</button>
+                                <button class="btn btn-icon btn-edit" onclick="editarSeguro(${s.id})" title="Editar">✏️</button>
+                                <button class="btn btn-icon btn-delete" onclick="excluirSeguro(${s.id})" title="Deletar">❌</button>
                             </td>
                         `;
                     }
@@ -233,6 +313,47 @@
                 segurosList.innerHTML = `<tr><td colspan="${cols}" class="empty-state"><p>Erro ao carregar seguros</p></td></tr>`;
             }
         }
+
+        let seguroIdEditando = null;
+
+        window.editarSeguro = (id) => {
+            const row = document.querySelector(`tr[data-seguro-id="${id}"]`);
+
+            if (row) {
+                seguroIdEditando = id;
+                document.querySelector('#seguro-id-edit').value = id;
+                document.querySelector('#titulo-edit').value = row.dataset.titulo;
+                document.querySelector('#cobertura-edit').value = row.dataset.cobertura;
+                document.querySelector('#valor-edit').value = row.dataset.valor;
+                document.querySelector('#tipo-edit').value = row.dataset.tipo;
+
+                modalEditarSeguro.classList.add('open');
+            } else {
+                alert('Erro ao carregar dados do seguro');
+            }
+        };
+
+        window.deletarSeguroModal = async () => {
+            if (!confirm('Deseja deletar este seguro? Esta ação não pode ser desfeita.')) return;
+
+            try {
+                msgEditarSeguro.textContent = 'Deletando...';
+                msgEditarSeguro.className = 'status-message info';
+
+                await deletarSeguro(seguroIdEditando);
+
+                msgEditarSeguro.textContent = 'Seguro deletado com sucesso!';
+                msgEditarSeguro.className = 'status-message success';
+
+                setTimeout(() => {
+                    modalEditarSeguro.classList.remove('open');
+                    carregarSeguros();
+                }, 1500);
+            } catch (error) {
+                msgEditarSeguro.textContent = 'Erro ao deletar: ' + error.message;
+                msgEditarSeguro.className = 'status-message error';
+            }
+        };
 
                 window.excluirSeguro = async (id) => {
                     if (!confirm('Deseja deletar este seguro?')) return;
@@ -252,4 +373,3 @@
     </script>
 </body>
 </html>
-

@@ -110,7 +110,9 @@
             requireAuth,
             logout,
             listarClientes,
-            cadastrarCliente
+            cadastrarCliente,
+            formatarCPF,
+            limparCPF
         } from './js/api.js';
         import { inicializarMenuHamburger } from './js/menu.js';
 
@@ -135,6 +137,7 @@
                 const formCliente = document.querySelector('#form-cliente');
                 const msgCliente = document.querySelector('#msg-cliente');
                 const clientesList = document.querySelector('#clientes-list');
+                const inputCPF = formCliente.querySelector('input[name="cpf"]');
 
                 // Só mostrar o botão para usuários autenticados
                 topbarActions.classList.add('visible');
@@ -144,16 +147,30 @@
                     if (e.target === modal) modal.classList.remove('open');
                 });
 
+                // Adicionar máscara de CPF ao input
+                inputCPF.addEventListener('input', (e) => {
+                    let valor = e.target.value;
+                    valor = formatarCPF(valor);
+                    e.target.value = valor;
+                });
+
                 formCliente.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const nome = formCliente.querySelector('input[name="nome"]').value;
-                    const cpf = formCliente.querySelector('input[name="cpf"]').value;
+                    const cpfFormatado = formCliente.querySelector('input[name="cpf"]').value;
+                    const cpfLimpo = limparCPF(cpfFormatado);
                     const dataNascimento = formCliente.querySelector('input[name="dataNascimento"]').value;
+
+                    if (cpfLimpo.length !== 11) {
+                        msgCliente.textContent = 'CPF deve conter exatamente 11 dígitos';
+                        msgCliente.className = 'status-message error';
+                        return;
+                    }
 
                     try {
                         msgCliente.textContent = 'Cadastrando...';
                         msgCliente.className = 'status-message info';
-                        await cadastrarCliente({ nome, cpf, dataNascimento });
+                        await cadastrarCliente({ nome, cpf: cpfLimpo, dataNascimento });
                         msgCliente.textContent = 'Cliente cadastrado!';
                         msgCliente.className = 'status-message success';
                         formCliente.reset();
@@ -167,6 +184,28 @@
                     }
                 });
 
+                function formatarDataNascimento(data) {
+                    if (!data) return '-';
+
+                    // Se a data vem já formatada como string (dd/MM/yyyy)
+                    if (typeof data === 'string' && data.includes('/')) {
+                        return data;
+                    }
+
+                    // Se vem como ISO (YYYY-MM-DD ou YYYY-MM-DDTHH:mm:ss)
+                    if (typeof data === 'string' && (data.includes('-') || data.includes('T'))) {
+                        const date = new Date(data);
+                        if (isNaN(date.getTime())) return '-';
+
+                        const dia = String(date.getDate()).padStart(2, '0');
+                        const mes = String(date.getMonth() + 1).padStart(2, '0');
+                        const ano = date.getFullYear();
+                        return `${dia}/${mes}/${ano}`;
+                    }
+
+                    return data;
+                }
+
                 async function carregarClientes() {
                     try {
                         const clientes = await listarClientes();
@@ -175,13 +214,13 @@
                             return;
                         }
                         clientesList.innerHTML = clientes.map(c => {
-                            // A data já vem formatada como "dd/MM/yyyy" do backend
-                            const dataNascimentoFormatada = c.dataNascimento || '-';
+                            const dataNascimentoFormatada = formatarDataNascimento(c.dataNascimento);
+                            const cpfFormatado = formatarCPF(c.cpf);
                             return `
                                 <tr>
                                     <td>${c.id}</td>
                                     <td>${c.nome}</td>
-                                    <td>${c.cpf}</td>
+                                    <td>${cpfFormatado}</td>
                                     <td>${dataNascimentoFormatada}</td>
                                 </tr>
                             `;

@@ -91,6 +91,39 @@
                     </div>
                 </div>
 
+                <div id="modal-editar-bem" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Editar Bem</h2>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <form id="form-editar-bem">
+                            <input type="hidden" id="bem-id-edit" name="id">
+                            <div class="form-group">
+                                <label>Cliente</label>
+                                <input type="text" id="cliente-nome-edit" name="cliente" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo</label>
+                                <select id="tipo-edit" name="tipo" required>
+                                    <option value="AUTO">Auto/Carro</option>
+                                    <option value="RESIDENCIAL">Residencial/Casa</option>
+                                    <option value="VIDA">Vida/Pessoa</option>
+                                    <option value="CELULAR">Celular/Eletrônico</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Descrição</label>
+                                <textarea id="descricao-edit" name="descricao" rows="4"></textarea>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                            </div>
+                        </form>
+                        <div id="msg-editar-bem" class="status-message"></div>
+                    </div>
+                </div>
+
                 <div id="cliente-filter" class="form-container" style="display: none;">
                     <label>Filtrar por Cliente:</label>
                     <select id="select-cliente-filter" style="width: 100%; max-width: 300px; padding: 8px; margin-top: 10px;">
@@ -277,7 +310,7 @@
                         <td>${tipo}</td>
                         <td>${descricao}</td>
                         <td class="actions">
-                            <button class="btn btn-small btn-edit" onclick="editarBem(${b.id})">Editar</button>
+                            <button class="btn btn-icon btn-edit" onclick="editarBem(${b.id})" title="Editar">✏️</button>
                         </td>
                     </tr>
                 `;
@@ -289,21 +322,44 @@
             const bem = bens.find(b => b.id === bemId);
             if (!bem) return;
 
-            const novaDescricao = prompt('Digite a nova descrição:', bem.descricao || '');
-            if (novaDescricao === null) return;
+            // Preencher o formulário de edição
+            document.querySelector('#bem-id-edit').value = bem.id;
+            document.querySelector('#cliente-nome-edit').value = clientes.find(c => c.id === bem.clienteId)?.nome || '';
+            document.querySelector('#tipo-edit').value = bem.tipo;
+            document.querySelector('#descricao-edit').value = bem.descricao || '';
 
-            atualizarDescricaoBem(bemId, novaDescricao);
+            const modalEditar = document.querySelector('#modal-editar-bem');
+            modalEditar.classList.add('open');
+
+            // Fechar modal de edição
+            const modalCloseEdit = modalEditar.querySelector('.modal-close');
+            modalCloseEdit.addEventListener('click', () => modalEditar.classList.remove('open'));
+            modalEditar.addEventListener('click', (e) => {
+                if (e.target === modalEditar) modalEditar.classList.remove('open');
+            });
         };
 
-        async function atualizarDescricaoBem(bemId, novaDescricao) {
+        // Salvar alterações do bem
+        document.querySelector('#form-editar-bem').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const bemId = document.querySelector('#bem-id-edit').value;
+            const tipo = document.querySelector('#tipo-edit').value;
+            const descricao = document.querySelector('#descricao-edit').value;
+
             try {
-                await atualizarBem(bemId, { descricao: novaDescricao });
-                alert('Bem atualizado!');
-                carregarBens();
+                await atualizarBem(bemId, { tipo, descricao });
+                document.querySelector('#msg-editar-bem').textContent = 'Bem atualizado com sucesso!';
+                document.querySelector('#msg-editar-bem').className = 'status-message success';
+
+                setTimeout(() => {
+                    document.querySelector('#modal-editar-bem').classList.remove('open');
+                    carregarBens();
+                }, 1500);
             } catch (error) {
-                alert('Erro ao atualizar: ' + error.message);
+                document.querySelector('#msg-editar-bem').textContent = 'Erro ao atualizar bem: ' + error.message;
+                document.querySelector('#msg-editar-bem').className = 'status-message error';
             }
-        }
+        });
 
                 // Inicializar
                 carregarClientes();
@@ -315,4 +371,3 @@
     </script>
 </body>
 </html>
-
