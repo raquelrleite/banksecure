@@ -7,6 +7,8 @@ import br.com.banksecure.app.service.BemService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("bem")
 public class BemController {
@@ -21,6 +23,12 @@ public class BemController {
     public BemResponse cadastrar(@RequestBody @Valid BemRequest request,
                                  @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
         return service.cadastrar(request, funcionarioId);
+    }
+
+    @GetMapping
+    public List<BemResponse> listarPorCliente(@RequestParam(required = false) Long clienteId,
+                                             @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
+        return service.listarPorCliente(clienteId, funcionarioId);
     }
 
     @PatchMapping("{bemId}")

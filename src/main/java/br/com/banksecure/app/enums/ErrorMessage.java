@@ -26,6 +26,7 @@ public enum ErrorMessage {
     BEM_POSSUI_SEGURO("Este bem já possui seguro vigente."),
     BEM_NAO_PERTENCE_AO_CLIENTE("O bem informado não pertence ao cliente titular da apólice."),
     TIPO_DO_BEM_INCOMPATIVEL("O tipo do seguro não corresponde ao tipo do bem informado."),
+    BEM_NAO_PERMITIDO_SEGURO_VIDA("Apólices de Vida não podem estar associadas a bens."),
     APOLICE_NAO_PODE_SER_RENOVADA("Esta apólice não pode ser renovada pois está: ");
     private final String message;
 }

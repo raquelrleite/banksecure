@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - BankSecure</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-page">
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/Santander.png" alt="Logo" class="sidebar-logo">
+                <h1 class="logo-compact">BankSecure</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clientes.html" class="nav-item">
+                    <span class="icon">👥</span>
+                    <span>Clientes</span>
+                </a>
+                <a href="seguros.html" class="nav-item">
+                    <span class="icon">🛡️</span>
+                    <span>Seguros</span>
+                </a>
+                <a href="cotacao.html" class="nav-item">
+                    <span class="icon">💰</span>
+                    <span>Cotação</span>
+                </a>
+                <a href="apolices.html" class="nav-item">
+                    <span class="icon">📋</span>
+                    <span>Apólices</span>
+                </a>
+                <a href="bens.html" class="nav-item">
+
+                    <span class="icon">🏠</span>
+                    <span>Bens</span>
+                </a>
+                <hr>
+                <button id="logout-btn" class="nav-item logout">
+                    <span class="icon">🚪</span>
+                    <span>Sair</span>
+                </button>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="user-info" id="user-info"></div>
+                <h2>Dashboard</h2>
+                <button class="hamburger-menu" id="hamburger-btn">☰</button>
+            </header>
+
+            <main class="content">
+                <h1 style="margin-bottom: 30px;">Bem-vindo ao BankSecure</h1>
+
+                <!-- Estatísticas Principais -->
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>👥 Clientes</h3>
+                        <p id="clientes-count">0</p>
+                        <a href="clientes.html" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 10px;">Visualizar</a>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>🛡️ Seguros</h3>
+                        <p id="seguros-count">0</p>
+                        <a href="seguros.html" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 10px;">Visualizar</a>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>🏠 Bens</h3>
+                        <p id="bens-count">0</p>
+                        <a href="bens.html" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 10px;">Visualizar</a>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>📋 Apólices</h3>
+                        <p id="apolices-count">0</p>
+                        <a href="apolices.html" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 10px;">Visualizar</a>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>💰 Receita Total</h3>
+                        <p id="receita-total">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <!-- Receita por Tipo de Seguro -->
+                <section class="recent-section">
+                    <h2>💹 Receita por Tipo de Seguro</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Seguro</th>
+                                    <th>Quantidade</th>
+                                    <th>Receita Total (R$)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="receita-por-tipo">
+                                <tr>
+                                    <td colspan="3" class="empty-state">Carregando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            requireAuth,
+            logout,
+            listarClientes,
+            listarSeguros,
+            listarApolices,
+            listarBens,
+            formatarMoeda
+        } from './js/api.js';
+        import { inicializarMenuHamburger } from './js/menu.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const funcionario = requireAuth();
+                document.querySelector('#user-info').textContent = `${funcionario.nome} (${funcionario.cargo})`;
+
+                // Event listener melhorado para o botão de logout
+                document.querySelector('#logout-btn').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Botão Sair clicado');
+                    logout();
+                });
+                inicializarMenuHamburger();
+
+                // Função para formatar valores monetários
+                function formatarMoedaLocal(valor) {
+                    return new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(valor);
+                }
+
+                async function carregarDados() {
+                    try {
+                        const clientes = await listarClientes();
+                        const seguros = await listarSeguros();
+                        const apolices = await listarApolices();
+                        const bens = await listarBens();
+
+                        // Atualizar contadores
+                        document.querySelector('#clientes-count').textContent = clientes.length || 0;
+                        document.querySelector('#seguros-count').textContent = seguros.length || 0;
+                        document.querySelector('#bens-count').textContent = bens.length || 0;
+
+                        // Calcular apólices e receita
+                        const totalApolices = apolices ? apolices.length : 0;
+                        const receitaTotal = apolices ? apolices.reduce((sum, a) => sum + (parseFloat(a.valorFinal) || 0), 0) : 0;
+
+                        document.querySelector('#apolices-count').textContent = totalApolices;
+                        document.querySelector('#receita-total').textContent = formatarMoedaLocal(receitaTotal);
+
+                        // Receita por tipo de seguro
+                        const recebaoPorTipo = document.querySelector('#receita-por-tipo');
+                        if (seguros.length === 0 || !apolices || apolices.length === 0) {
+                            recebaoPorTipo.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhuma apólice gerada</td></tr>';
+                        } else {
+                            // Agrupar apólices por tipo de seguro
+                            const receitaPorSeguro = {};
+                            apolices.forEach(a => {
+                                const seguro = seguros.find(s => s.id == a.seguroId);
+                                if (seguro) {
+                                    if (!receitaPorSeguro[seguro.titulo]) {
+                                        receitaPorSeguro[seguro.titulo] = { quantidade: 0, receita: 0 };
+                                    }
+                                    receitaPorSeguro[seguro.titulo].quantidade++;
+                                    receitaPorSeguro[seguro.titulo].receita += parseFloat(a.valorFinal) || 0;
+                                }
+                            });
+
+                            recebaoPorTipo.innerHTML = Object.entries(receitaPorSeguro).map(([tipo, dados]) => `
+                                <tr>
+                                    <td>${tipo}</td>
+                                    <td>${dados.quantidade}</td>
+                                    <td>${formatarMoedaLocal(dados.receita)}</td>
+                                </tr>
+                            `).join('');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao carregar dados:', error);
+                    }
+                }
+
+                carregarDados();
+            } catch (error) {
+                console.error('Erro ao inicializar dashboard:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+

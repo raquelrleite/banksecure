@@ -62,7 +62,6 @@ public class ApoliceService {
         boolean isSeguroVida = seguro.getTipo() == TipoSeguroeBem.VIDA;
 
         if (isSeguroVida) {
-
             if (request.bemId() != null) {
                 throw new TipoIncompativelException(TIPO_DO_BEM_INCOMPATIVEL.getMessage());
             }

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BankSecure - Login</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo-container">
+                <img src="/Santander.png" alt="BankSecure Logo" class="logo-image">
+            </div>
+            <h1 class="logo">BankSecure</h1>
+            <p class="subtitle">Sistema de Gerenciamento de Seguros</p>
+
+            <section class="auth-section">
+                <h2>Acesso de Funcionários</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label>Usuário</label>
+                        <input type="text" name="username" placeholder="ex: samuel.leite" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" name="password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                </form>
+                <div id="login-message" class="status-message"></div>
+                <div class="link-group">
+                    <a href="seguros.html">Ver seguros disponíveis →</a>
+                </div>
+            </section>
+
+            <hr class="divider">
+
+            <section class="auth-section">
+                <h2>Cadastro de Funcionário</h2>
+
+                <!-- Etapa 1: Validação de Token -->
+                <form id="token-form">
+                    <div class="form-group">
+                        <label>Token de Validação</label>
+                        <input type="password" name="token" id="token-input" placeholder="Digite o token" required>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Validar</button>
+                </form>
+                <div id="token-message" class="status-message"></div>
+
+                <!-- Etapa 2: Formulário de Cadastro (Oculto inicialmente) -->
+                <div id="cadastro-section" style="display: none; margin-top: 20px;">
+                    <h3>Preencha os dados</h3>
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label>Nome Completo</label>
+                            <input type="text" name="nome" placeholder="João Silva" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cargo</label>
+                            <input type="text" name="cargo" placeholder="ex: Gerente" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Usuário</label>
+                            <input type="text" name="username" placeholder="ex: joao.silva" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Senha</label>
+                            <input type="password" name="password" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Cadastrar</button>
+                    </form>
+                    <div id="register-message" class="status-message"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            storage,
+            loginFuncionario,
+            cadastrarFuncionario
+        } from './js/api.js';
+
+        const funcionario = storage.getFuncionario();
+        if (funcionario) {
+            window.location.href = 'dashboard.html';
+        }
+
+        const loginForm = document.querySelector('#login-form');
+        const tokenForm = document.querySelector('#token-form');
+        const registerForm = document.querySelector('#register-form');
+        const cadastroSection = document.querySelector('#cadastro-section');
+        const loginMsg = document.querySelector('#login-message');
+        const tokenMsg = document.querySelector('#token-message');
+        const registerMsg = document.querySelector('#register-message');
+        const tokenInput = document.querySelector('#token-input');
+
+        // Handler para login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = loginForm.querySelector('input[name="username"]').value;
+            const password = loginForm.querySelector('input[name="password"]').value;
+
+            try {
+                loginMsg.textContent = 'Autenticando...';
+                loginMsg.className = 'status-message info';
+                await loginFuncionario({ username, password });
+                loginMsg.textContent = 'Login realizado!';
+                loginMsg.className = 'status-message success';
+                setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+            } catch (error) {
+                loginMsg.textContent = error.message;
+                loginMsg.className = 'status-message error';
+            }
+        });
+
+        // Handler para validação de token
+        tokenForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const token = tokenInput.value.trim();
+
+            if (token !== 'gof1rst') {
+                tokenMsg.textContent = 'Token inválido!';
+                tokenMsg.className = 'status-message error';
+                tokenInput.value = '';
+                return;
+            }
+
+            tokenMsg.textContent = 'Token válido! Preencha os dados abaixo.';
+            tokenMsg.className = 'status-message success';
+            cadastroSection.style.display = 'block';
+            tokenForm.style.display = 'none';
+        });
+
+        // Handler para cadastro
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = registerForm.querySelector('input[name="nome"]').value;
+            const cargo = registerForm.querySelector('input[name="cargo"]').value;
+            const username = registerForm.querySelector('input[name="username"]').value;
+            const password = registerForm.querySelector('input[name="password"]').value;
+
+            try {
+                registerMsg.textContent = 'Criando funcionário...';
+                registerMsg.className = 'status-message info';
+                await cadastrarFuncionario({ nome, cargo, username, password });
+                registerMsg.textContent = 'Cadastro realizado com sucesso! Faça login agora.';
+                registerMsg.className = 'status-message success';
+                registerForm.reset();
+                setTimeout(() => {
+                    tokenForm.style.display = 'block';
+                    cadastroSection.style.display = 'none';
+                    tokenInput.value = '';
+                    loginMsg.textContent = '';
+                    tokenMsg.textContent = '';
+                    registerMsg.textContent = '';
+                }, 2000);
+            } catch (error) {
+                registerMsg.textContent = error.message;
+                registerMsg.className = 'status-message error';
+            }
+        });
+    </script>
+
+</body>
+</html>
+
