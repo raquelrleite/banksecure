@@ -1,26 +1,22 @@
 package br.com.banksecure.app.controller;
 
-import br.com.banksecure.app.dto.request.ClienteRequest;
 import br.com.banksecure.app.dto.request.SeguroRequest;
 import br.com.banksecure.app.dto.request.SeguroUpdateRequest;
 import br.com.banksecure.app.dto.response.SeguroResponse;
 import br.com.banksecure.app.enums.TipoSeguroeBem;
-import br.com.banksecure.app.service.ClienteService;
 import br.com.banksecure.app.service.SeguroService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
