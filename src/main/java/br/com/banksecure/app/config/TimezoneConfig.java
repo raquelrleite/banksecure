@@ -4,10 +4,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.TimeZone;
 
-/**
- * Configuração de Timezone para a aplicação.
- * Define São Paulo (America/Sao_Paulo) como timezone padrão.
- */
 @Configuration
 public class TimezoneConfig {
 
