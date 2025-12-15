@@ -4,5 +4,6 @@ public enum TipoSeguroeBem {
     VIDA,
     AUTO,
     RESIDENCIAL,
-    CELULAR
+    CELULAR,
+    MOTO
 }

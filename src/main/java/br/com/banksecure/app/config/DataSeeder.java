@@ -60,7 +60,7 @@ public class DataSeeder implements ApplicationRunner {
             }
             Funcionario funcionario = new Funcionario();
             funcionario.setNome(nomes.get(i));
-            funcionario.setCargo("Especialista " + (i + 1));
+            funcionario.setCargo("Especialista");
             funcionario.setUsername(username);
             funcionario.setPassword(username);
             funcionarioRepository.save(funcionario);
@@ -75,25 +75,25 @@ public class DataSeeder implements ApplicationRunner {
                 new SeguroSeed(
                         "Automóvel",
                         "Cobertura contra colisão, incêndio, roubo e danos materiais/corporais a terceiros.",
-                        new BigDecimal("1800.00"),
+                        new BigDecimal("2400.00"),
                         TipoSeguroeBem.AUTO
                 ),
                 new SeguroSeed(
                         "Residencial",
                         "Cobertura básica contra incêndio, explosão, danos elétricos e vendaval.",
-                        new BigDecimal("350.00"),
+                        new BigDecimal("700.00"),
                         TipoSeguroeBem.RESIDENCIAL
                 ),
                 new SeguroSeed(
                         "Vida",
                         "Cobertura completa para proteção financeira da família em caso de morte ou invalidez.",
-                        new BigDecimal("500.00"),
+                        new BigDecimal("300.00"),
                         TipoSeguroeBem.VIDA
                 ),
                 new SeguroSeed(
                         "Celular",
                         "Proteção contra danos acidental, roubo, perda e cobertura de reparos.",
-                        new BigDecimal("150.00"),
+                        new BigDecimal("600.00"),
                         TipoSeguroeBem.CELULAR
                 )
         );
