@@ -36,7 +36,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             CpfExistenteException.class,
-            SeguroExistenteException.class
+            SeguroExistenteException.class,
+            RegraApoliceException.class
     })
     public ResponseEntity<ApiErrorResponse> handleConflict(RuntimeException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
