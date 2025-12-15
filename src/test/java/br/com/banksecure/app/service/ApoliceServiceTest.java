@@ -283,7 +283,7 @@ public class ApoliceServiceTest {
         ApoliceRequest requestVida = ApoliceRequest.builder()
                 .clienteId(1L)
                 .seguroId(1L)
-                .bemId(99L)
+                .bemId(null)
                 .build();
 
         when(seguroRepository.findById(any())).thenReturn(Optional.of(seguroVida));
