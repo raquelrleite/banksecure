@@ -432,7 +432,6 @@ html, body {
     white-space: nowrap;
     order: 1;
     flex-shrink: 0;
-    font-weight: 600;
 }
 
 .topbar h2 {
@@ -461,6 +460,10 @@ html, body {
     flex-shrink: 0;
 }
 
+.user-info {
+    font-size: 14px;
+    color: var(--dark);
+}
 
 .hamburger-menu {
     display: none;
