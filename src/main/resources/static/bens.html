@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bens - BankSecure</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-page">
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/Santander.png" alt="Logo" class="sidebar-logo">
+                <h1 class="logo-compact">BankSecure</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clientes.html" class="nav-item">
+                    <span class="icon">👥</span>
+                    <span>Clientes</span>
+                </a>
+                <a href="seguros.html" class="nav-item">
+                    <span class="icon">🛡️</span>
+                    <span>Seguros</span>
+                </a>
+                <a href="cotacao.html" class="nav-item">
+                    <span class="icon">💰</span>
+                    <span>Cotação</span>
+                </a>
+                <a href="apolices.html" class="nav-item">
+                    <span class="icon">📋</span>
+                    <span>Apólices</span>
+                </a>
+                <a href="bens.html" class="nav-item active">
+                    <span class="icon">🏠</span>
+                    <span>Bens</span>
+                </a>
+                <hr>
+                <button id="logout-btn" class="nav-item logout">
+                    <span class="icon">🚪</span>
+                    <span>Sair</span>
+                </button>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="user-info" id="user-info"></div>
+                <h2>Bens</h2>
+                <div class="topbar-actions">
+                    <button id="btn-novo-bem" class="btn btn-primary btn-sm">+ Novo Bem</button>
+                </div>
+                <button class="hamburger-menu" id="hamburger-btn">☰</button>
+            </header>
+
+            <main class="content">
+                <div id="modal-bem" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Novo Bem</h2>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <form id="form-bem">
+                            <div class="form-group">
+                                <label>Cliente</label>
+                                <select name="clienteId" required>
+                                    <option value="">Carregando clientes...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo</label>
+                                <select name="tipo" required>
+                                    <option value="">Selecione um tipo</option>
+                                    <option value="AUTO">Auto/Carro</option>
+                                    <option value="RESIDENCIAL">Residencial/Casa</option>
+                                    <option value="VIDA">Vida/Pessoa</option>
+                                    <option value="CELULAR">Celular/Eletrônico</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Descrição (opcional)</label>
+                                <textarea name="descricao" rows="4" placeholder="Ex: Toyota Corolla 2020, branco"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Registrar Bem</button>
+                        </form>
+                        <div id="msg-bem" class="status-message"></div>
+                    </div>
+                </div>
+
+                <div id="cliente-filter" class="form-container" style="display: none;">
+                    <label>Filtrar por Cliente:</label>
+                    <select id="select-cliente-filter" style="width: 100%; max-width: 300px; padding: 8px; margin-top: 10px;">
+                        <option value="">Todos os clientes</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bens-list">
+                            <tr>
+                                <td colspan="5" class="empty-state">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            requireAuth,
+            logout,
+            listarClientes,
+            listarBens,
+            cadastrarBem,
+            atualizarBem
+        } from './js/api.js';
+        import { inicializarMenuHamburger } from './js/menu.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const funcionario = requireAuth();
+                document.querySelector('#user-info').textContent = `${funcionario.nome} (${funcionario.cargo})`;
+
+                // Event listener melhorado para o botão de logout
+                document.querySelector('#logout-btn').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Botão Sair clicado');
+                    logout();
+                });
+                inicializarMenuHamburger();
+
+        const modal = document.querySelector('#modal-bem');
+        const btnNovoBem = document.querySelector('#btn-novo-bem');
+        const modalClose = document.querySelector('.modal-close');
+        const formBem = document.querySelector('#form-bem');
+        const msgBem = document.querySelector('#msg-bem');
+        const bensList = document.querySelector('#bens-list');
+        const clienteFilter = document.querySelector('#cliente-filter');
+        const selectClienteFilter = document.querySelector('#select-cliente-filter');
+
+        let clientes = [];
+        let bens = [];
+        let filtroClienteId = null;
+
+        // Abrir/fechar modal
+        btnNovoBem.addEventListener('click', () => {
+            formBem.reset();
+            msgBem.textContent = '';
+            modal.classList.add('open');
+        });
+
+        modalClose.addEventListener('click', () => modal.classList.remove('open'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('open');
+        });
+
+        // Carregar clientes
+        async function carregarClientes() {
+            try {
+                clientes = await listarClientes();
+
+                const clienteSelect = formBem.querySelector('select[name="clienteId"]');
+                clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>' +
+                    clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+
+                selectClienteFilter.innerHTML = '<option value="">Todos os clientes</option>' +
+                    clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+
+                clienteFilter.style.display = 'block';
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+            }
+        }
+
+        // Filtrar por cliente
+        selectClienteFilter.addEventListener('change', (e) => {
+            filtroClienteId = e.target.value ? parseInt(e.target.value) : null;
+            exibirBens();
+        });
+
+        // Cadastrar novo bem
+        formBem.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const clienteId = formBem.querySelector('select[name="clienteId"]').value;
+            const tipo = formBem.querySelector('select[name="tipo"]').value;
+            const descricao = formBem.querySelector('textarea[name="descricao"]').value;
+
+            if (!clienteId || !tipo) {
+                msgBem.textContent = 'Selecione cliente e tipo';
+                msgBem.className = 'status-message error';
+                return;
+            }
+
+            try {
+                msgBem.textContent = 'Registrando bem...';
+                msgBem.className = 'status-message info';
+
+                await cadastrarBem({
+                    clienteId: parseInt(clienteId),
+                    tipo: tipo,
+                    descricao: descricao || null
+                });
+
+                msgBem.textContent = 'Bem registrado com sucesso!';
+                msgBem.className = 'status-message success';
+
+                setTimeout(() => {
+                    modal.classList.remove('open');
+                    carregarBens();
+                }, 1500);
+            } catch (error) {
+                msgBem.textContent = error.message;
+                msgBem.className = 'status-message error';
+            }
+        });
+
+        // Carregar bens
+        async function carregarBens() {
+            try {
+                // Garantir que clientes estejam carregados
+                if (clientes.length === 0) {
+                    await carregarClientes();
+                }
+
+                // Se houver filtro, buscar bens do cliente específico
+                if (filtroClienteId) {
+                    bens = await listarBens(filtroClienteId);
+                } else {
+                    // Buscar todos os bens (chamar sem parâmetro)
+                    bens = await listarBens();
+                }
+                exibirBens();
+            } catch (error) {
+                console.error('Erro ao carregar bens:', error);
+                bensList.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Erro ao carregar bens</p></td></tr>';
+            }
+        }
+
+        // Exibir bens na tabela
+        function exibirBens() {
+            let bensFiltrados = bens;
+
+            if (filtroClienteId) {
+                bensFiltrados = bens.filter(b => b.clienteId === filtroClienteId);
+            }
+
+            if (!bensFiltrados || bensFiltrados.length === 0) {
+                bensList.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Nenhum bem registrado</p></td></tr>';
+                return;
+            }
+
+            bensList.innerHTML = bensFiltrados.map(b => {
+                const clienteNome = clientes.find(c => c.id == b.clienteId)?.nome || '-';
+                const tipo = b.tipo || '-';
+                const descricao = b.descricao || '-';
+
+                return `
+                    <tr>
+                        <td>${b.id}</td>
+                        <td>${clienteNome}</td>
+                        <td>${tipo}</td>
+                        <td>${descricao}</td>
+                        <td class="actions">
+                            <button class="btn btn-small btn-edit" onclick="editarBem(${b.id})">Editar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Editar bem
+        window.editarBem = (bemId) => {
+            const bem = bens.find(b => b.id === bemId);
+            if (!bem) return;
+
+            const novaDescricao = prompt('Digite a nova descrição:', bem.descricao || '');
+            if (novaDescricao === null) return;
+
+            atualizarDescricaoBem(bemId, novaDescricao);
+        };
+
+        async function atualizarDescricaoBem(bemId, novaDescricao) {
+            try {
+                await atualizarBem(bemId, { descricao: novaDescricao });
+                alert('Bem atualizado!');
+                carregarBens();
+            } catch (error) {
+                alert('Erro ao atualizar: ' + error.message);
+            }
+        }
+
+                // Inicializar
+                carregarClientes();
+                carregarBens();
+            } catch (error) {
+                console.error('Erro ao inicializar bens:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+

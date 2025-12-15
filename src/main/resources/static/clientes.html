@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - BankSecure</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-page">
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/Santander.png" alt="Logo" class="sidebar-logo">
+                <h1 class="logo-compact">BankSecure</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clientes.html" class="nav-item active">
+                    <span class="icon">👥</span>
+                    <span>Clientes</span>
+                </a>
+                <a href="seguros.html" class="nav-item">
+                    <span class="icon">🛡️</span>
+                    <span>Seguros</span>
+                </a>
+                <a href="cotacao.html" class="nav-item">
+                    <span class="icon">💰</span>
+                    <span>Cotação</span>
+                </a>
+                <a href="apolices.html" class="nav-item">
+                    <span class="icon">📋</span>
+                    <span>Apólices</span>
+                </a>
+                <a href="bens.html" class="nav-item">
+                    <span class="icon">🏠</span>
+                    <span>Bens</span>
+                </a>
+                <hr>
+                <button id="logout-btn" class="nav-item logout">
+                    <span class="icon">🚪</span>
+                    <span>Sair</span>
+                </button>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="user-info" id="user-info"></div>
+                <h2>Clientes</h2>
+                <div class="topbar-actions" id="topbar-actions">
+                    <button id="btn-novo-cliente" class="btn btn-primary btn-sm">+ Novo Cliente</button>
+                </div>
+                <button class="hamburger-menu" id="hamburger-btn">☰</button>
+            </header>
+
+            <main class="content">
+
+                <div id="modal-cliente" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Novo Cliente</h2>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <form id="form-cliente">
+                            <div class="form-group">
+                                <label>Nome Completo</label>
+                                <input type="text" name="nome" required>
+                            </div>
+                            <div class="form-group">
+                                <label>CPF</label>
+                                <input type="text" name="cpf" placeholder="00000000000" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Data de Nascimento</label>
+                                <input type="date" name="dataNascimento" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Cadastrar</button>
+                        </form>
+                        <div id="msg-cliente" class="status-message"></div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Data de Nascimento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientes-list">
+                            <tr>
+                                <td colspan="4" class="empty-state">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            requireAuth,
+            logout,
+            listarClientes,
+            cadastrarCliente
+        } from './js/api.js';
+        import { inicializarMenuHamburger } from './js/menu.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const funcionario = requireAuth();
+                document.querySelector('#user-info').textContent = `${funcionario.nome} (${funcionario.cargo})`;
+
+                // Event listener melhorado para o botão de logout
+                document.querySelector('#logout-btn').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Botão Sair clicado');
+                    logout();
+                });
+                inicializarMenuHamburger();
+
+                const modal = document.querySelector('#modal-cliente');
+                const btnNovoCliente = document.querySelector('#btn-novo-cliente');
+                const topbarActions = document.querySelector('#topbar-actions');
+                const modalClose = document.querySelector('.modal-close');
+                const formCliente = document.querySelector('#form-cliente');
+                const msgCliente = document.querySelector('#msg-cliente');
+                const clientesList = document.querySelector('#clientes-list');
+
+                // Só mostrar o botão para usuários autenticados
+                topbarActions.classList.add('visible');
+                btnNovoCliente.addEventListener('click', () => modal.classList.add('open'));
+                modalClose.addEventListener('click', () => modal.classList.remove('open'));
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.remove('open');
+                });
+
+                formCliente.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const nome = formCliente.querySelector('input[name="nome"]').value;
+                    const cpf = formCliente.querySelector('input[name="cpf"]').value;
+                    const dataNascimento = formCliente.querySelector('input[name="dataNascimento"]').value;
+
+                    try {
+                        msgCliente.textContent = 'Cadastrando...';
+                        msgCliente.className = 'status-message info';
+                        await cadastrarCliente({ nome, cpf, dataNascimento });
+                        msgCliente.textContent = 'Cliente cadastrado!';
+                        msgCliente.className = 'status-message success';
+                        formCliente.reset();
+                        setTimeout(() => {
+                            modal.classList.remove('open');
+                            carregarClientes();
+                        }, 1500);
+                    } catch (error) {
+                        msgCliente.textContent = error.message;
+                        msgCliente.className = 'status-message error';
+                    }
+                });
+
+                async function carregarClientes() {
+                    try {
+                        const clientes = await listarClientes();
+                        if (clientes.length === 0) {
+                            clientesList.innerHTML = '<tr><td colspan="4" class="empty-state"><p>Nenhum cliente cadastrado</p></td></tr>';
+                            return;
+                        }
+                        clientesList.innerHTML = clientes.map(c => {
+                            // A data já vem formatada como "dd/MM/yyyy" do backend
+                            const dataNascimentoFormatada = c.dataNascimento || '-';
+                            return `
+                                <tr>
+                                    <td>${c.id}</td>
+                                    <td>${c.nome}</td>
+                                    <td>${c.cpf}</td>
+                                    <td>${dataNascimentoFormatada}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } catch (error) {
+                        clientesList.innerHTML = `<tr><td colspan="4" class="empty-state"><p>Erro ao carregar clientes</p></td></tr>`;
+                    }
+                }
+
+                carregarClientes();
+            } catch (error) {
+                console.error('Erro ao inicializar clientes:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguros - BankSecure</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-page">
+    <div class="layout">
+        <aside class="sidebar hidden" id="sidebar">
+            <div class="sidebar-header">
+                <img src="/Santander.png" alt="Logo" class="sidebar-logo">
+                <h1 class="logo-compact">BankSecure</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" id="nav-dashboard">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clientes.html" class="nav-item" id="nav-clientes">
+                    <span class="icon">👥</span>
+                    <span>Clientes</span>
+                </a>
+                <a href="seguros.html" class="nav-item active">
+                    <span class="icon">🛡️</span>
+                    <span>Seguros</span>
+                </a>
+                <a href="cotacao.html" class="nav-item">
+                    <span class="icon">💰</span>
+                    <span>Cotação</span>
+                </a>
+                <a href="apolices.html" class="nav-item">
+                    <span class="icon">📋</span>
+                    <span>Apólices</span>
+                </a>
+                <a href="bens.html" class="nav-item">
+                    <span class="icon">🏠</span>
+                    <span>Bens</span>
+                </a>
+                <hr id="admin-divider">
+                <button id="logout-btn" class="nav-item logout">
+                    <span class="icon">🚪</span>
+                    <span>Sair</span>
+                </button>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="user-info" id="user-info">Visualizador Público</div>
+                <h2>Seguros Disponíveis</h2>
+                <div class="topbar-actions" id="topbar-actions" style="display: none;">
+                    <button id="btn-novo-seguro" class="btn btn-primary btn-sm">+ Novo Seguro</button>
+                </div>
+                <div class="topbar-actions" id="topbar-anonimo">
+                    <button id="btn-voltar-inicio" class="btn btn-secondary btn-sm">← Voltar ao Início</button>
+                </div>
+                <button class="hamburger-menu" id="hamburger-btn">☰</button>
+            </header>
+
+            <main class="content">
+
+                <div id="modal-seguro" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Novo Seguro</h2>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <form id="form-seguro">
+                            <div class="form-group">
+                                <label>Nome do Seguro</label>
+                                <input type="text" name="titulo" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Cobertura Mínima</label>
+                                <textarea name="coberturaMinima" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Valor Prêmio Base (R$)</label>
+                                <input type="number" name="valorPremioBase" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo</label>
+                                <select name="tipo" required>
+                                    <option value="">Selecione um tipo</option>
+                                    <option value="VIDA">Vida</option>
+                                    <option value="AUTO">Automóvel</option>
+                                    <option value="RESIDENCIAL">Residencial</option>
+                                    <option value="CELULAR">Celular</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Cadastrar</button>
+                        </form>
+                        <div id="msg-seguro" class="status-message"></div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Tipo</th>
+                                <th>Cobertura</th>
+                                <th>Valor Base (R$)</th>
+                                <th id="th-acoes" style="display: none;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="seguros-list">
+                            <tr>
+                                <td colspan="6" class="empty-state">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            requireAuth,
+            logout,
+            isAuthenticated,
+            listarSeguros,
+            cadastrarSeguro,
+            deletarSeguro,
+            formatarMoeda
+        } from './js/api.js';
+        import { inicializarMenuHamburger } from './js/menu.js';
+
+        const estaAutenticado = isAuthenticated();
+        const userInfo = document.querySelector('#user-info');
+        const btnNovoSeguro = document.querySelector('#btn-novo-seguro');
+        const topbarActions = document.querySelector('#topbar-actions');
+        const topbarAnonimo = document.querySelector('#topbar-anonimo');
+        const btnVoltarInicio = document.querySelector('#btn-voltar-inicio');
+        const sidebar = document.querySelector('#sidebar');
+        const modal = document.querySelector('#modal-seguro');
+        const modalClose = document.querySelector('.modal-close');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (estaAutenticado) {
+                    const funcionario = requireAuth();
+                    userInfo.textContent = `${funcionario.nome} (${funcionario.cargo})`;
+                    topbarActions.style.display = 'flex';
+                    topbarAnonimo.style.display = 'none';
+                    document.querySelector('#th-acoes').style.display = 'table-cell';
+                    sidebar.classList.remove('hidden');
+                    document.querySelector('#logout-btn').addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Botão Sair clicado');
+                        logout();
+                    });
+                    inicializarMenuHamburger();
+
+                    // Apenas usuário autenticado pode clicar no botão
+                    btnNovoSeguro.addEventListener('click', () => modal.classList.add('open'));
+                } else {
+                    // Usuário anônimo - mostrar botão de voltar
+                    topbarAnonimo.style.display = 'flex';
+                    btnVoltarInicio.addEventListener('click', () => {
+                        window.location.href = 'index.html';
+                    });
+                }
+
+        const formSeguro = document.querySelector('#form-seguro');
+        const msgSeguro = document.querySelector('#msg-seguro');
+        const segurosList = document.querySelector('#seguros-list');
+
+        modalClose.addEventListener('click', () => modal.classList.remove('open'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('open');
+        });
+
+        formSeguro.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titulo = formSeguro.querySelector('input[name="titulo"]').value;
+            const coberturaMinima = formSeguro.querySelector('textarea[name="coberturaMinima"]').value;
+            const valorPremioBase = parseFloat(formSeguro.querySelector('input[name="valorPremioBase"]').value);
+            const tipo = formSeguro.querySelector('select[name="tipo"]').value;
+
+            try {
+                msgSeguro.textContent = 'Cadastrando...';
+                msgSeguro.className = 'status-message info';
+                await cadastrarSeguro({ titulo, coberturaMinima, valorPremioBase, tipo });
+                msgSeguro.textContent = 'Seguro cadastrado!';
+                msgSeguro.className = 'status-message success';
+                formSeguro.reset();
+                setTimeout(() => {
+                    modal.classList.remove('open');
+                    carregarSeguros();
+                }, 1500);
+            } catch (error) {
+                msgSeguro.textContent = error.message;
+                msgSeguro.className = 'status-message error';
+            }
+        });
+
+        async function carregarSeguros() {
+            try {
+                const seguros = await listarSeguros();
+                if (seguros.length === 0) {
+                    segurosList.innerHTML = `<tr><td colspan="${estaAutenticado ? 6 : 5}" class="empty-state"><p>Nenhum seguro disponível</p></td></tr>`;
+                    return;
+                }
+                segurosList.innerHTML = seguros.map(s => {
+                    let row = `
+                        <tr>
+                            <td>${s.id}</td>
+                            <td>${s.titulo}</td>
+                            <td>${s.tipo}</td>
+                            <td>${s.coberturaMinima || '-'}</td>
+                            <td>${formatarMoeda(parseFloat(s.valorPremioBase))}</td>
+                    `;
+                    if (estaAutenticado) {
+                        row += `
+                            <td class="actions">
+                                <button class="btn btn-small btn-delete" onclick="excluirSeguro(${s.id})">Deletar</button>
+                            </td>
+                        `;
+                    }
+                    row += '</tr>';
+                    return row;
+                }).join('');
+            } catch (error) {
+                const cols = estaAutenticado ? 6 : 5;
+                segurosList.innerHTML = `<tr><td colspan="${cols}" class="empty-state"><p>Erro ao carregar seguros</p></td></tr>`;
+            }
+        }
+
+                window.excluirSeguro = async (id) => {
+                    if (!confirm('Deseja deletar este seguro?')) return;
+                    try {
+                        await deletarSeguro(id);
+                        carregarSeguros();
+                    } catch (error) {
+                        alert('Erro ao deletar: ' + error.message);
+                    }
+                };
+
+                carregarSeguros();
+            } catch (error) {
+                console.error('Erro ao inicializar seguros:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+

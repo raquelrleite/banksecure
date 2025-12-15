@@ -1,5 +1,7 @@
 package br.com.banksecure.app.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -13,6 +15,8 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler({
             ApoliceNaoEncontradaException.class,
@@ -86,7 +90,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception ex) {
-        ex.printStackTrace();
+        logger.error("Erro não tratado na aplicação: ", ex);
 
         return buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,

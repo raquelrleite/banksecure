@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apólices - BankSecure</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-page">
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/Santander.png" alt="Logo" class="sidebar-logo">
+                <h1 class="logo-compact">BankSecure</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clientes.html" class="nav-item">
+                    <span class="icon">👥</span>
+                    <span>Clientes</span>
+                </a>
+                <a href="seguros.html" class="nav-item">
+                    <span class="icon">🛡️</span>
+                    <span>Seguros</span>
+                </a>
+                <a href="cotacao.html" class="nav-item">
+                    <span class="icon">💰</span>
+                    <span>Cotação</span>
+                </a>
+                <a href="apolices.html" class="nav-item active">
+                    <span class="icon">📋</span>
+                    <span>Apólices</span>
+                </a>
+                <a href="bens.html" class="nav-item">
+                    <span class="icon">🏠</span>
+                    <span>Bens</span>
+                </a>
+                <hr>
+                <button id="logout-btn" class="nav-item logout">
+                    <span class="icon">🚪</span>
+                    <span>Sair</span>
+                </button>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="user-info" id="user-info"></div>
+                <h2>Apólices</h2>
+                <div class="topbar-actions">
+                    <button id="btn-nova-apolice" class="btn btn-primary btn-sm">+ Nova Apólice</button>
+                </div>
+                <button class="hamburger-menu" id="hamburger-btn">☰</button>
+            </header>
+
+            <main class="content">
+                <!-- Abas -->
+                <div class="tabs-container">
+                    <button class="tab-btn active" data-tab="apolices-tab">📋 Apólices</button>
+                    <button class="tab-btn" data-tab="auditoria-tab">📜 Auditoria</button>
+                </div>
+
+                <!-- Aba de Apólices -->
+                <div id="apolices-tab" class="tab-content active">
+                    <div id="modal-apolice" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>Nova Apólice</h2>
+                                <button class="modal-close">&times;</button>
+                            </div>
+                            <form id="form-apolice">
+                                <div class="form-group">
+                                    <label>Cliente</label>
+                                    <select name="clienteId" required>
+                                        <option value="">Carregando clientes...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Bem (opcional)</label>
+                                    <select name="bemId">
+                                        <option value="">Nenhum bem</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Seguro</label>
+                                    <select name="seguroId" required>
+                                        <option value="">Carregando seguros...</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Gerar Apólice</button>
+                            </form>
+                            <div id="msg-apolice" class="status-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Cliente</th>
+                                    <th>Seguro</th>
+                                    <th>Valor Final (R$)</th>
+                                    <th>Início Vigência</th>
+                                    <th>Fim Vigência</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="apolices-list">
+                                <tr>
+                                    <td colspan="8" class="empty-state">Carregando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Aba de Auditoria -->
+                <div id="auditoria-tab" class="tab-content">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Funcionário</th>
+                                    <th>Ação</th>
+                                    <th>Apólice ID</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditoria-list">
+                                <tr>
+                                    <td colspan="5" class="empty-state">Carregando histórico...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            requireAuth,
+            logout,
+            listarClientes,
+            listarSeguros,
+            listarBens,
+            gerarApolice,
+            listarApolices,
+            apolicesAvencer,
+            renovarApolice,
+            atualizarApolice,
+            deletarApolice,
+            formatarMoeda
+        } from './js/api.js';
+        import { inicializarMenuHamburger } from './js/menu.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const funcionario = requireAuth();
+                document.querySelector('#user-info').textContent = `${funcionario.nome} (${funcionario.cargo})`;
+
+                // Event listener melhorado para o botão de logout
+                document.querySelector('#logout-btn').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Botão Sair clicado');
+                    logout();
+                });
+                inicializarMenuHamburger();
+
+                const modal = document.querySelector('#modal-apolice');
+                const btnNovaApolice = document.querySelector('#btn-nova-apolice');
+                const modalClose = document.querySelector('.modal-close');
+                const formApolice = document.querySelector('#form-apolice');
+                const msgApolice = document.querySelector('#msg-apolice');
+                const apolicesList = document.querySelector('#apolices-list');
+                const auditoriaList = document.querySelector('#auditoria-list');
+
+                let clientes = [];
+                let seguros = [];
+                let bensDisponiveis = [];
+
+                // Gerenciamento de abas
+                const tabBtns = document.querySelectorAll('.tab-btn');
+                tabBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const tabName = e.target.getAttribute('data-tab');
+
+                        // Remover classe active de todos os botões e abas
+                        tabBtns.forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+                        // Adicionar classe active ao botão clicado e à aba correspondente
+                        e.target.classList.add('active');
+                        document.getElementById(tabName).classList.add('active');
+
+                        // Se abrir a aba de auditoria, carregar dados
+                        if (tabName === 'auditoria-tab') {
+                            carregarAuditoria();
+                        }
+                    });
+                });
+
+                // Abrir/fechar modal
+                btnNovaApolice.addEventListener('click', () => {
+                    formApolice.reset();
+                    msgApolice.textContent = '';
+                    modal.classList.add('open');
+                });
+
+                modalClose.addEventListener('click', () => modal.classList.remove('open'));
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.remove('open');
+                });
+
+                // Carregar bens ao selecionar cliente
+                formApolice.querySelector('select[name="clienteId"]').addEventListener('change', async (e) => {
+                    const clienteId = e.target.value;
+            const bemSelect = formApolice.querySelector('select[name="bemId"]');
+
+            if (!clienteId) {
+                bemSelect.innerHTML = '<option value="">Nenhum bem</option>';
+                return;
+            }
+
+            try {
+                bensDisponiveis = await listarBens(clienteId);
+                    bemSelect.innerHTML = '<option value="">Nenhum bem</option>' +
+                        bensDisponiveis.map(b => `<option value="${b.id}">${b.tipo} - ${b.descricao || 'Sem descrição'}</option>`).join('');
+                } catch (error) {
+                    console.error('Erro ao carregar bens:', error);
+                    bemSelect.innerHTML = '<option value="">Erro ao carregar bens</option>';
+                }
+                });
+
+                // Carregar dados (clientes e seguros)
+                async function carregarDados() {
+                    try {
+                        clientes = await listarClientes();
+                        seguros = await listarSeguros();
+
+                        const clienteSelect = formApolice.querySelector('select[name="clienteId"]');
+                        const seguroSelect = formApolice.querySelector('select[name="seguroId"]');
+
+                        clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>' +
+                            clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+
+                        seguroSelect.innerHTML = '<option value="">Selecione um seguro</option>' +
+                            seguros.map(s => `<option value="${s.id}">${s.titulo}</option>`).join('');
+                    } catch (error) {
+                        console.error('Erro ao carregar dados:', error);
+                    }
+                }
+
+                // Gerar nova apólice
+                formApolice.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const clienteId = formApolice.querySelector('select[name="clienteId"]').value;
+                    const seguroId = formApolice.querySelector('select[name="seguroId"]').value;
+                    const bemId = formApolice.querySelector('select[name="bemId"]').value;
+
+                    if (!clienteId || !seguroId) {
+                        msgApolice.textContent = 'Selecione cliente e seguro';
+                        msgApolice.className = 'status-message error';
+                        return;
+                    }
+
+                    try {
+                        msgApolice.textContent = 'Gerando apólice...';
+                        msgApolice.className = 'status-message info';
+
+                        await gerarApolice({
+                            clienteId: parseInt(clienteId),
+                            seguroId: parseInt(seguroId),
+                            bemId: bemId ? parseInt(bemId) : null
+                        });
+
+                        // Registrar na auditoria
+                        const clienteNome = clientes.find(c => c.id == clienteId)?.nome || 'Desconhecido';
+                        const seguroNome = seguros.find(s => s.id == seguroId)?.titulo || 'Desconhecido';
+                        registrarAuditoria('CRIAR', null, `Apólice gerada para ${clienteNome} - Seguro: ${seguroNome}`);
+
+                        msgApolice.textContent = 'Apólice gerada com sucesso!';
+                        msgApolice.className = 'status-message success';
+
+                        setTimeout(() => {
+                            modal.classList.remove('open');
+                            carregarApolices();
+                        }, 1500);
+                    } catch (error) {
+                        msgApolice.textContent = error.message;
+                        msgApolice.className = 'status-message error';
+                    }
+                });
+
+                // Salvar log de auditoria localmente
+                function registrarAuditoria(acao, apoliceId, descricao) {
+                    const auditorialog = {
+                        dataHora: new Date().toISOString(),
+                        funcionarioNome: funcionario.nome,
+                        acao: acao,
+                        apoliceId: apoliceId,
+                        descricao: descricao
+                    };
+
+                    const logs = JSON.parse(localStorage.getItem('auditoria_apolices') || '[]');
+                    logs.push(auditorialog);
+                    localStorage.setItem('auditoria_apolices', JSON.stringify(logs));
+                }
+
+                // Carregar auditoria do localStorage
+                async function carregarAuditoria() {
+                    try {
+                        const logs = JSON.parse(localStorage.getItem('auditoria_apolices') || '[]');
+
+                        if (!logs || logs.length === 0) {
+                            auditoriaList.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Nenhum registro de auditoria</p></td></tr>';
+                            return;
+                        }
+
+                        // Ordenar por data mais recente primeiro
+                        logs.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+
+                        auditoriaList.innerHTML = logs.map(a => `
+                            <tr>
+                                <td>${new Date(a.dataHora).toLocaleString('pt-BR')}</td>
+                                <td>${a.funcionarioNome || '-'}</td>
+                                <td><span class="status-badge">${a.acao}</span></td>
+                                <td>${a.apoliceId || '-'}</td>
+                                <td>${a.descricao || '-'}</td>
+                            </tr>
+                        `).join('');
+                    } catch (error) {
+                        console.error('Erro ao carregar auditoria:', error);
+                        auditoriaList.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Erro ao carregar auditoria</p></td></tr>';
+                    }
+                }
+
+                // Carregar e exibir apólices
+                async function carregarApolices() {
+                    try {
+                        // Garantir que clientes e seguros estejam carregados
+                        if (clientes.length === 0 || seguros.length === 0) {
+                            await carregarDados();
+                        }
+
+                        const apolices = await listarApolices();
+
+                        if (!apolices || apolices.length === 0) {
+                            apolicesList.innerHTML = '<tr><td colspan="8" class="empty-state"><p>Nenhuma apólice registrada</p></td></tr>';
+                            return;
+                        }
+
+                        apolicesList.innerHTML = apolices.map(a => {
+                            const dataInicio = a.inicioVigencia || '-';
+                            const dataFim = a.fimVigencia || '-';
+                            const clienteNome = clientes.find(c => c.id == a.clienteId)?.nome || `-`;
+                            const seguroNome = seguros.find(s => s.id == a.seguroId)?.titulo || `-`;
+                            const valor = formatarMoeda(parseFloat(a.valorFinal));
+
+                            // Calcular dias até vencimento
+                            let diasAteVencimento = -1;
+                            let mostrarBotaoRenovar = false;
+                            let corDataFim = '';
+
+                            if (dataFim !== '-') {
+                                const [dia, mes, ano] = dataFim.split('/');
+                                const dataVencimento = new Date(ano, mes - 1, dia);
+                                const hoje = new Date();
+                                const diferenca = dataVencimento - hoje;
+                                diasAteVencimento = Math.ceil(diferenca / (1000 * 60 * 60 * 24));
+
+                                // Mostrar botão renovar se vencer em menos de 60 dias
+                                mostrarBotaoRenovar = diasAteVencimento >= 0 && diasAteVencimento <= 60;
+
+                                // Colorir em vermelho se vencer em menos de 60 dias
+                                if (diasAteVencimento <= 60 && diasAteVencimento >= 0) {
+                                    corDataFim = 'style="color: red; font-weight: bold;"';
+                                }
+                            }
+
+                            return `
+                                <tr>
+                                    <td>${a.id}</td>
+                                    <td>${clienteNome}</td>
+                                    <td>${seguroNome}</td>
+                                    <td>${valor}</td>
+                                    <td>${dataInicio}</td>
+                                    <td ${corDataFim}>${dataFim}</td>
+                                    <td><span class="status-badge">${a.status || 'ATIVA'}</span></td>
+                                    <td class="actions">
+                                        <button class="btn btn-small btn-edit" onclick="editarApolice(${a.id})">Editar</button>
+                                        ${mostrarBotaoRenovar ? `<button class="btn btn-small" style="background-color: #FF9800;" onclick="renovarAp(${a.id})">Renovar</button>` : ''}
+                                        <button class="btn btn-small btn-delete" onclick="excluirAp(${a.id})">Deletar</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } catch (error) {
+                        console.error('Erro ao carregar apólices:', error);
+                        apolicesList.innerHTML = '<tr><td colspan="8" class="empty-state"><p>Erro ao carregar apólices</p></td></tr>';
+                    }
+                }
+
+                // Renovar apólice
+                window.renovarAp = async (apoliceId) => {
+                    if (!confirm('Deseja renovar esta apólice?')) return;
+                    try {
+                        await renovarApolice(apoliceId);
+                        registrarAuditoria('RENOVAR', apoliceId, 'Apólice renovada com sucesso');
+                        alert('Apólice renovada com sucesso!');
+                        carregarApolices();
+                    } catch (error) {
+                        alert('Erro ao renovar: ' + error.message);
+                    }
+                };
+
+                // Editar apólice (apenas data fim)
+                window.editarApolice = (apoliceId) => {
+                    const novaDataFim = prompt('Digite a nova data de fim (dd/mm/yyyy):');
+                    if (!novaDataFim) return;
+
+                    atualizarDataFim(apoliceId, novaDataFim);
+                };
+
+                async function atualizarDataFim(apoliceId, novaDataFim) {
+                    try {
+                        await atualizarApolice(apoliceId, { fimVigencia: novaDataFim });
+                        registrarAuditoria('EDITAR', apoliceId, `Data de fim atualizada para ${novaDataFim}`);
+                        alert('Data de fim atualizada!');
+                        carregarApolices();
+                    } catch (error) {
+                        alert('Erro ao atualizar: ' + error.message);
+                    }
+                }
+
+                // Deletar apólice
+                window.excluirAp = async (apoliceId) => {
+                    if (!confirm('Deseja deletar esta apólice?')) return;
+                    try {
+                        await deletarApolice(apoliceId);
+                        registrarAuditoria('DELETAR', apoliceId, 'Apólice deletada');
+                        carregarApolices();
+                    } catch (error) {
+                        alert('Erro ao deletar: ' + error.message);
+                    }
+                };
+
+                // Inicializar
+                carregarDados();
+                carregarApolices();
+            } catch (error) {
+                console.error('Erro ao inicializar apólices:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+

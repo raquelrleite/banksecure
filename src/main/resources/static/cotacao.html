@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotação de Seguro - BankSecure</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-page">
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/Santander.png" alt="Logo" class="sidebar-logo">
+                <h1 class="logo-compact">BankSecure</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clientes.html" class="nav-item">
+                    <span class="icon">👥</span>
+                    <span>Clientes</span>
+                </a>
+                <a href="seguros.html" class="nav-item">
+                    <span class="icon">🛡️</span>
+                    <span>Seguros</span>
+                </a>
+                <a href="cotacao.html" class="nav-item active">
+                    <span class="icon">💰</span>
+                    <span>Cotação</span>
+                </a>
+                <a href="apolices.html" class="nav-item">
+                    <span class="icon">📋</span>
+                    <span>Apólices</span>
+                </a>
+                <a href="bens.html" class="nav-item">
+                    <span class="icon">🏠</span>
+                    <span>Bens</span>
+                </a>
+                <hr>
+                <button id="logout-btn" class="nav-item logout">
+                    <span class="icon">🚪</span>
+                    <span>Sair</span>
+                </button>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="user-info" id="user-info"></div>
+                <h2>Cotação de Seguro</h2>
+                <button class="hamburger-menu" id="hamburger-btn">☰</button>
+            </header>
+
+            <main class="content">
+                <div class="form-container">
+                    <h2>Simular Cotação</h2>
+
+                    <form id="form-cotacao">
+                        <div class="form-group">
+                            <label>Cliente</label>
+                            <select id="cliente-select" name="clienteId" required>
+                                <option value="">Carregando clientes...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Seguro</label>
+                            <select id="seguro-select" name="seguroId" required>
+                                <option value="">Carregando seguros...</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Calcular Cotação</button>
+                    </form>
+
+                    <div id="resultado-cotacao">
+                        <div class="cotacao-result">
+                            <h3>Resultado da Cotação</h3>
+                            <div class="result-item">
+                                <span>Cliente:</span>
+                                <strong id="result-cliente"></strong>
+                            </div>
+                            <div class="result-item">
+                                <span>Seguro:</span>
+                                <strong id="result-seguro"></strong>
+                            </div>
+                            <div class="result-item">
+                                <span>Valor Base:</span>
+                                <strong id="result-valor-base"></strong>
+                            </div>
+                            <div class="result-item">
+                                <span>Idade:</span>
+                                <strong id="result-idade"></strong>
+                            </div>
+                            <div class="result-item">
+                                <span>Valor Final (com taxas):</span>
+                                <strong id="result-valor-final" style="color: var(--primary); font-size: 18px;"></strong>
+                            </div>
+                            <p style="font-size: 12px; color: #999; margin-top: 15px; text-align: justify;">
+                                <strong>Como funciona o cálculo:</strong> Valor Base + Taxa Fixa (5%) + Taxa por Idade (se > 60 anos) × Taxa de Risco (1.10)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            requireAuth,
+            logout,
+            listarSeguros,
+            listarClientes,
+            calcularCotacao,
+            formatarMoeda
+        } from './js/api.js';
+        import { inicializarMenuHamburger } from './js/menu.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const funcionario = requireAuth();
+                document.querySelector('#user-info').textContent = `${funcionario.nome} (${funcionario.cargo})`;
+
+                // Event listener melhorado para o botão de logout
+                document.querySelector('#logout-btn').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Botão Sair clicado');
+                    logout();
+                });
+                inicializarMenuHamburger();
+
+        const formCotacao = document.querySelector('#form-cotacao');
+        const clienteSelect = document.querySelector('#cliente-select');
+        const seguroSelect = document.querySelector('#seguro-select');
+        const resultadoCotacao = document.querySelector('#resultado-cotacao');
+
+        let seguros = [];
+        let clientes = [];
+
+        // Carregar clientes e seguros
+        async function carregarDados() {
+            try {
+                clientes = await listarClientes();
+                seguros = await listarSeguros();
+
+                clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>' +
+                    clientes.map(c => `<option value="${c.id}" data-datanascimento="${c.dataNascimento}">${c.nome}</option>`).join('');
+
+                seguroSelect.innerHTML = '<option value="">Selecione um seguro</option>' +
+                    seguros.map(s => `<option value="${s.id}" data-valor="${s.valorPremioBase}" data-titulo="${s.titulo}">${s.titulo} (${formatarMoeda(parseFloat(s.valorPremioBase))})</option>`).join('');
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                clienteSelect.innerHTML = '<option value="">Erro ao carregar clientes</option>';
+                seguroSelect.innerHTML = '<option value="">Erro ao carregar seguros</option>';
+            }
+        }
+
+        // Handler para calcular cotação
+        formCotacao.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const clienteId = clienteSelect.value;
+            const seguroId = seguroSelect.value;
+
+            if (!clienteId) {
+                alert('Selecione um cliente');
+                return;
+            }
+
+            if (!seguroId) {
+                alert('Selecione um seguro');
+                return;
+            }
+
+            const clienteSelecionado = clientes.find(c => c.id == clienteId);
+            const seguroSelecionado = seguros.find(s => s.id == seguroId);
+            const valorBase = parseFloat(seguroSelecionado.valorPremioBase);
+
+            // Converter data DD/MM/YYYY para Date
+            const [dia, mes, ano] = clienteSelecionado.dataNascimento.split('/');
+            const dataStr = `${ano}-${mes}-${dia}`;
+            const valorFinal = calcularCotacao(valorBase, dataStr);
+
+            // Calcular idade
+            const hoje = new Date();
+            const nascimento = new Date(dataStr);
+            let idade = hoje.getFullYear() - nascimento.getFullYear();
+            const mesAtual = hoje.getMonth() - nascimento.getMonth();
+
+            if (mesAtual < 0 || (mesAtual === 0 && hoje.getDate() < nascimento.getDate())) {
+                idade--;
+            }
+
+            // Exibir resultado
+            document.querySelector('#result-cliente').textContent = clienteSelecionado.nome;
+            document.querySelector('#result-seguro').textContent = seguroSelecionado.titulo;
+            document.querySelector('#result-valor-base').textContent = formatarMoeda(valorBase);
+            document.querySelector('#result-idade').textContent = `${idade} anos`;
+            document.querySelector('#result-valor-final').textContent = formatarMoeda(valorFinal);
+
+                resultadoCotacao.classList.add('visible');
+            });
+
+            carregarDados();
+            } catch (error) {
+                console.error('Erro ao inicializar cotação:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+

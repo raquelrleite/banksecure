@@ -12,6 +12,8 @@ import br.com.banksecure.app.repository.ClienteRepository;
 import br.com.banksecure.app.util.ValidarAcesso;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static br.com.banksecure.app.enums.ErrorMessage.BEM_NAO_ENCONTRADO;
 import static br.com.banksecure.app.enums.ErrorMessage.CLIENTE_NAO_ENCONTRADO;
 
@@ -43,6 +45,20 @@ public class BemService {
 
         repository.save(bem);
         return mapper.converterParaResponse(bem);
+    }
+
+    public List<BemResponse> listarPorCliente(Long clienteId, Long funcionarioId) {
+        acesso.validarAcesso(funcionarioId);
+
+        if (clienteId == null) {
+            return repository.findAll().stream()
+                    .map(mapper::converterParaResponse)
+                    .toList();
+        }
+
+        return repository.findByClienteId(clienteId).stream()
+                .map(mapper::converterParaResponse)
+                .toList();
     }
 
     public BemResponse atualizar(Long id, BemUpdateRequest request, Long funcionarioId){

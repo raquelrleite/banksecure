@@ -11,5 +11,6 @@ public interface BemMapper {
     Bem converterParaEntity(BemRequest request);
 
     @Mapping(source = "cliente.id", target = "clienteId")
+    @Mapping(source = "tipo", target = "tipo")
     BemResponse converterParaResponse(Bem bem);
 }
