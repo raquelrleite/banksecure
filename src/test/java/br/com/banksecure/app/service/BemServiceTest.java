@@ -53,7 +53,7 @@ public class BemServiceTest {
 
         request = BemRequest.builder()
                 .clienteId(1L)
-                .tipo(String.valueOf(TipoSeguroeBem.AUTO))
+                .tipo(TipoSeguroeBem.AUTO)
                 .descricao("Fiat Uno com escada no teto")
                 .build();
 

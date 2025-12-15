@@ -19,12 +19,13 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ClienteResponse cadastrar(@RequestBody @Valid ClienteRequest request) {
-        return service.cadastrar(request);
+    public ClienteResponse cadastrar(@RequestBody @Valid ClienteRequest request,
+                                     @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
+        return service.cadastrar(request, funcionarioId);
     }
 
     @GetMapping
-    public List<ClienteResponse> listarTodosClientes() {
-        return service.listarTodosClientes();
+    public List<ClienteResponse> listarTodosClientes(@RequestHeader("X-Funcionario-Id") Long funcionarioId) {
+        return service.listarTodosClientes(funcionarioId);
     }
 }

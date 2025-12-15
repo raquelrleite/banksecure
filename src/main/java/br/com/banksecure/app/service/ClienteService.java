@@ -7,6 +7,7 @@ import br.com.banksecure.app.exception.CpfExistenteException;
 import br.com.banksecure.app.exception.IdadeInvalidaException;
 import br.com.banksecure.app.mapper.ClienteMapper;
 import br.com.banksecure.app.repository.ClienteRepository;
+import br.com.banksecure.app.util.ValidarAcesso;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,17 +21,20 @@ import static br.com.banksecure.app.enums.ErrorMessage.*;
 public class ClienteService {
 
     private final ClienteRepository repository;
-
+    private final ValidarAcesso acesso;
     private final ClienteMapper mapper;
 
-    public ClienteService(ClienteRepository repository, ClienteMapper mapper) {
+    public ClienteService(ClienteRepository repository, ValidarAcesso acesso, ClienteMapper mapper) {
         this.repository = repository;
+        this.acesso = acesso;
         this.mapper = mapper;
     }
 
 
     @Transactional
-    public ClienteResponse cadastrar(ClienteRequest request) {
+    public ClienteResponse cadastrar(ClienteRequest request, Long funcionarioId) {
+        acesso.validarAcesso(funcionarioId);
+
         if (repository.existsByCpf(request.cpf())) {
             throw new CpfExistenteException(CPF_JA_EXISTE.getMessage());
         }
@@ -58,7 +62,9 @@ public class ClienteService {
         }
     }
 
-    public List<ClienteResponse> listarTodosClientes() {
+    public List<ClienteResponse> listarTodosClientes(Long funcionarioId) {
+        acesso.validarAcesso(funcionarioId);
+
         List<Cliente> clientes = repository.findAll();
         return clientes.stream()
                 .map(mapper::converterParaResponse)

@@ -6,6 +6,7 @@ import lombok.Builder;
 @Builder
 public record BemResponse(
         Long id,
+        Long clienteId,
         TipoSeguroeBem tipo,
         String descricao
 ) {

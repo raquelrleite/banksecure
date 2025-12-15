@@ -7,6 +7,7 @@ import br.com.banksecure.app.exception.CpfExistenteException;
 import br.com.banksecure.app.exception.IdadeInvalidaException;
 import br.com.banksecure.app.mapper.ClienteMapper;
 import br.com.banksecure.app.repository.ClienteRepository;
+import br.com.banksecure.app.util.ValidarAcesso;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,8 +20,7 @@ import java.util.List;
 
 import static br.com.banksecure.app.enums.ErrorMessage.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ClienteServiceTest {
@@ -31,6 +31,8 @@ public class ClienteServiceTest {
     private ClienteRepository repository;
     @Mock
     private ClienteMapper mapper;
+    @Mock
+    private ValidarAcesso acesso;
 
     private Cliente cliente;
     private ClienteRequest request;
@@ -38,6 +40,7 @@ public class ClienteServiceTest {
 
     @BeforeEach
     void setUp(){
+        doNothing().when(acesso).validarAcesso(1L);
         cliente = Cliente.builder()
                 .id(1L)
                 .nome("Nicolas")
@@ -66,7 +69,7 @@ public class ClienteServiceTest {
         when(mapper.converterParaResponse(cliente)).thenReturn(response);
         when(repository.save(cliente)).thenReturn(cliente);
 
-        ClienteResponse resultado = service.cadastrar(request);
+        ClienteResponse resultado = service.cadastrar(request, 1L);
 
         assertNotNull(resultado);
 
@@ -80,7 +83,7 @@ public class ClienteServiceTest {
         CpfExistenteException ex =
                 assertThrows(
                         CpfExistenteException.class,
-                () -> service.cadastrar(request));
+                () -> service.cadastrar(request, 1L));
 
         assertEquals(CPF_JA_EXISTE.getMessage(), ex.getMessage());
     }
@@ -105,7 +108,7 @@ public class ClienteServiceTest {
         IdadeInvalidaException ex =
                 assertThrows(
                         IdadeInvalidaException.class,
-                        () -> service.cadastrar(menorIdade));
+                        () -> service.cadastrar(menorIdade, 1L));
 
         assertEquals(MENOR_IDADE.getMessage(), ex.getMessage());
     }
@@ -130,7 +133,7 @@ public class ClienteServiceTest {
         IdadeInvalidaException ex =
                 assertThrows(
                         IdadeInvalidaException.class,
-                        () -> service.cadastrar(superIdoso));
+                        () -> service.cadastrar(superIdoso, 1L));
 
         assertEquals(MAIOR_QUE_120.getMessage(), ex.getMessage());
     }
@@ -140,7 +143,7 @@ public class ClienteServiceTest {
         when(repository.findAll()).thenReturn(List.of(cliente));
         when(mapper.converterParaResponse(cliente)).thenReturn(response);
 
-        List<ClienteResponse> clientes = service.listarTodosClientes();
+        List<ClienteResponse> clientes = service.listarTodosClientes(1L);
 
         assertEquals(1, clientes.size());
 
