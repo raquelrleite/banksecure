@@ -48,7 +48,7 @@ public class ApoliceController {
     @PutMapping("cancelar/{apoliceId}")
     public void cancelar(@PathVariable Long apoliceId,
                         @RequestHeader("X-Funcionario-Id") Long funcionarioId) {
-        service.cancelar(funcionarioId, apoliceId);
+        service.cancelar(apoliceId, funcionarioId);
     }
 
     @GetMapping("lista")

@@ -63,6 +63,10 @@ public class ApoliceService {
 
         if (isSeguroVida) {
 
+            if (request.bemId() != null) {
+                throw new TipoIncompativelException(TIPO_DO_BEM_INCOMPATIVEL.getMessage());
+            }
+
             if (repository.existsByClienteIdAndSeguro_Tipo(request.clienteId(), TipoSeguroeBem.VIDA)) {
                 throw new ClientePossuiSegVidaException(CLIENTE_POSSUI_SEGVIDA.getMessage());
             }
@@ -71,7 +75,9 @@ public class ApoliceService {
                 throw new BemNaoEncontradoException(BEM_NAO_ENCONTRADO.getMessage());
             }
             bem = bemRepository.findById(request.bemId())
-                    .orElseThrow(() -> new BemNaoEncontradoException(BEM_NAO_ENCONTRADO.getMessage()));
+                    .orElseThrow(
+                            () -> new BemNaoEncontradoException(BEM_NAO_ENCONTRADO.getMessage()));
+
 
             if (!bem.getCliente().getId().equals(cliente.getId())) {
                 throw new AcessoNegadoException(BEM_NAO_PERTENCE_AO_CLIENTE.getMessage());
