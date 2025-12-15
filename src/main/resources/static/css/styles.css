@@ -43,6 +43,7 @@ html, body {
     justify-content: center;
     min-height: 100vh;
     background: #FFFFFF;
+    padding: 20px;
 }
 
 .login-container {
@@ -61,12 +62,19 @@ html, body {
 .logo-container {
     text-align: center;
     margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .logo-image {
     width: 60px;
     height: auto;
     margin-bottom: 15px;
+    max-width: 100%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .logo {
@@ -75,6 +83,7 @@ html, body {
     font-weight: 700;
     text-align: center;
     margin-bottom: 8px;
+    word-wrap: break-word;
 }
 
 .subtitle {
@@ -82,6 +91,7 @@ html, body {
     color: var(--dark);
     font-size: 14px;
     margin-bottom: 30px;
+    word-wrap: break-word;
 }
 
 .auth-section {
@@ -169,7 +179,24 @@ html, body {
 }
 
 .btn-secondary:hover {
-    background-color: #2d2d2d;
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+/* Botão público com destaque em vermelho */
+#btn-voltar-inicio {
+    background-color: var(--primary);
+    color: var(--white);
+    border: 2px solid var(--primary);
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+#btn-voltar-inicio:hover {
+    background-color: #CC0000;
+    border-color: #CC0000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(236, 0, 0, 0.3);
 }
 
 .btn-sm {
@@ -728,6 +755,54 @@ td.actions {
     color: var(--primary);
 }
 
+/* ========================================
+   PÁGINA PÚBLICA - SEGUROS
+   ======================================== */
+
+.table-container-public {
+    border: 3px solid var(--primary);
+    box-shadow: 0 4px 12px rgba(236, 0, 0, 0.15);
+}
+
+.table-container-public table thead {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.table-container-public table thead th {
+    color: var(--white);
+    font-weight: 700;
+}
+
+.table-container-public table tbody tr:hover {
+    background-color: rgba(236, 0, 0, 0.05);
+    border-left: 4px solid var(--primary);
+}
+
+.btn-secondary {
+    background-color: var(--dark);
+    color: var(--white);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+/* Estilo para o título em página pública */
+.topbar-anonimo ~ .content h2,
+.topbar-anonimo {
+    color: var(--primary);
+}
+
+.topbar-title-public {
+    color: var(--primary) !important;
+    font-weight: 700;
+    font-size: 24px;
+    text-shadow: 0 2px 4px rgba(236, 0, 0, 0.1);
+}
+
+
 #resultado-cotacao {
     display: none;
     margin-top: 30px;
@@ -833,8 +908,49 @@ td.actions {
         display: block;
     }
 
+    .login-page {
+        padding: 15px;
+    }
+
+    .login-container {
+        max-width: 100%;
+        padding: 10px;
+    }
+
     .login-box {
         padding: 30px 20px;
+    }
+
+    .logo {
+        font-size: 24px;
+    }
+
+    .logo-image {
+        width: 50px;
+    }
+
+    .auth-section h2 {
+        font-size: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 14px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    .btn {
+        padding: 10px 16px;
+        font-size: 13px;
     }
 
     .dashboard-grid {
@@ -849,10 +965,12 @@ td.actions {
     .topbar h2 {
         order: 2;
         flex: 1 0 100%;
+        font-size: 18px;
     }
 
     .topbar-actions {
         margin-left: 0;
+        flex: 1 0 100%;
     }
 
     .content {
@@ -866,22 +984,252 @@ td.actions {
     th, td {
         padding: 8px 10px;
     }
+
+    .modal-content {
+        width: 90%;
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    .modal-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-header h2 {
+        font-size: 18px;
+        margin: 0;
+    }
+
+    .btn-icon {
+        padding: 4px 8px;
+        font-size: 14px;
+    }
 }
 
 @media (max-width: 480px) {
+    .login-page {
+        padding: 10px;
+        min-height: auto;
+    }
+
+    .login-container {
+        max-width: 100%;
+        padding: 0;
+    }
+
     .login-box {
         padding: 20px 15px;
+        border-radius: 8px;
     }
 
     .logo {
-        font-size: 24px;
+        font-size: 22px;
+        margin-bottom: 6px;
+    }
+
+    .logo-image {
+        width: 45px;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        font-size: 12px;
+        margin-bottom: 20px;
+    }
+
+    .auth-section {
+        margin-bottom: 20px;
+    }
+
+    .auth-section h2 {
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+
+    .auth-section h3 {
+        font-size: 13px;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-group label {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 12px;
+        padding: 6px 8px;
     }
 
     .btn {
-        padding: 12px 16px;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .divider {
+        margin: 15px 0;
+    }
+
+    .link-group {
+        margin-top: 12px;
+    }
+
+    .link-group a {
+        font-size: 12px;
     }
 
     .modal-content {
         width: 95%;
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .modal-header {
+        margin-bottom: 15px;
+    }
+
+    .modal-header h2 {
+        font-size: 16px;
+    }
+
+    .status-message {
+        font-size: 12px;
+        padding: 8px 10px;
+        margin-top: 8px;
+    }
+
+    .btn-sm {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .btn-icon {
+        padding: 4px 6px;
+        font-size: 12px;
+    }
+
+    table {
+        font-size: 11px;
+    }
+
+    th, td {
+        padding: 6px 8px;
+    }
+
+    .topbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .topbar h2 {
+        font-size: 16px;
+        margin: 0;
+    }
+
+    .topbar-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .topbar-actions button {
+        width: 100%;
+    }
+
+    .user-info {
+        font-size: 12px;
+    }
+
+    .hamburger-menu {
+        display: block;
+        padding: 5px;
+    }
+
+    .content {
+        padding: 10px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-buttons button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 360px) {
+    .login-box {
+        padding: 15px 10px;
+    }
+
+    .logo {
+        font-size: 18px;
+        margin-bottom: 4px;
+    }
+
+    .logo-image {
+        width: 40px;
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        font-size: 11px;
+        margin-bottom: 15px;
+    }
+
+    .auth-section h2 {
+        font-size: 13px;
+        margin-bottom: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-group label {
+        font-size: 11px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 11px;
+        padding: 5px 6px;
+    }
+
+    .btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .divider {
+        margin: 10px 0;
+    }
+
+    .modal-content {
+        width: 98%;
+        padding: 12px;
+    }
+
+    .modal-header h2 {
+        font-size: 14px;
+    }
+
+    .status-message {
+        font-size: 11px;
+        padding: 6px 8px;
     }
 }

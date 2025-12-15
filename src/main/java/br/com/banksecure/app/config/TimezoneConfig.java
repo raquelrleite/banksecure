@@ -1,4 +1,4 @@
-package br.com.banksecure_v1.app.config;
+package br.com.banksecure.app.config;
 
 import org.springframework.context.annotation.Configuration;
 
