@@ -44,6 +44,7 @@ html, body {
     min-height: 100vh;
     background: #FFFFFF;
     padding: 20px;
+    overflow-y: auto;
 }
 
 .login-container {
@@ -74,6 +75,7 @@ html, body {
     margin-bottom: 15px;
     max-width: 100%;
     display: block;
+    min-width: 40px;
 }
 
 .logo {
@@ -432,6 +434,7 @@ html, body {
     white-space: nowrap;
     order: 1;
     flex-shrink: 0;
+    font-weight: bold;
 }
 
 .topbar h2 {
@@ -556,11 +559,14 @@ th {
     text-align: left;
     font-weight: 600;
     color: var(--dark);
+    white-space: normal;
+    word-break: break-word;
 }
 
 td {
     padding: 12px 15px;
     border-bottom: 1px solid var(--border);
+    text-align: left;
 }
 
 tbody tr:hover {
@@ -573,7 +579,7 @@ tbody tr:hover {
     justify-content: center;
 }
 
-th:last-child {
+th.actions {
     text-align: center;
 }
 
@@ -808,10 +814,10 @@ td.actions {
 }
 
 .topbar-title-public {
-    color: var(--primary) !important;
+    color: var(--dark) !important;
     font-weight: 700;
     font-size: 24px;
-    text-shadow: 0 2px 4px rgba(236, 0, 0, 0.1);
+    text-shadow: none;
 }
 
 
