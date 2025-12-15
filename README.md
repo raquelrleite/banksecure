@@ -4,7 +4,7 @@ Um sistema de gerenciamento de apólices e propostas de seguros desenvolvido com
 
 ## 🚀 Tecnologias
 
-- **Backend:** Java 17, Spring Boot, Spring Data JPA, H2 Database
+- **Backend:** Java 21, Spring Boot, Spring Data JPA, H2 Database
 - **Frontend:** HTML5, CSS3, JavaScript (ES6 Modules)
 - **Testes:** JUnit 5, Mockito, JaCoCo
 

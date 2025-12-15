@@ -55,7 +55,7 @@ html, body {
 .login-box {
     background: var(--white);
     border-radius: var(--radius);
-    padding: 40px;
+    padding: 40px 30px;
     box-shadow: var(--shadow);
 }
 
@@ -63,18 +63,17 @@ html, body {
     text-align: center;
     margin-bottom: 20px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
 .logo-image {
-    width: 60px;
+    width: 70px;
     height: auto;
     margin-bottom: 15px;
     max-width: 100%;
     display: block;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .logo {
@@ -433,6 +432,7 @@ html, body {
     white-space: nowrap;
     order: 1;
     flex-shrink: 0;
+    font-weight: 600;
 }
 
 .topbar h2 {
@@ -461,10 +461,6 @@ html, body {
     flex-shrink: 0;
 }
 
-.user-info {
-    font-size: 14px;
-    color: var(--dark);
-}
 
 .hamburger-menu {
     display: none;
@@ -755,9 +751,7 @@ td.actions {
     color: var(--primary);
 }
 
-/* ========================================
-   PÁGINA PÚBLICA - SEGUROS
-   ======================================== */
+/* PÁGINA PÚBLICA - SEGUROS */
 
 .table-container-public {
     border: 3px solid var(--primary);
@@ -777,6 +771,21 @@ td.actions {
 .table-container-public table tbody tr:hover {
     background-color: rgba(236, 0, 0, 0.05);
     border-left: 4px solid var(--primary);
+}
+
+/* Tabelas internas (clientes, apolices, bens) com header em vermelho */
+.table-container table thead {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.table-container table thead th {
+    color: var(--white);
+    font-weight: 700;
+}
+
+.table-container table tbody tr:hover {
+    background-color: #f0f0f0;
 }
 
 .btn-secondary {

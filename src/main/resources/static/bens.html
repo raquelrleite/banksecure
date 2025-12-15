@@ -114,7 +114,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Descrição</label>
-                                <textarea id="descricao-edit" name="descricao" rows="4"></textarea>
+                                <textarea id="descricao-edit" name="descricao" rows="4" placeholder="Ex: Toyota Corolla 2020, branco"></textarea>
                             </div>
                             <div class="form-buttons">
                                 <button type="submit" class="btn btn-primary">Salvar Alterações</button>
@@ -190,6 +190,29 @@
         let clientes = [];
         let bens = [];
         let filtroClienteId = null;
+
+        // Mapa de placeholders por tipo de bem
+        const placeholdersPorTipo = {
+            'AUTO': 'Ex: Toyota Corolla 2020, branco, placa ABC-1234',
+            'RESIDENCIAL': 'Ex: Casa na Av. Paulista, 1578 - São Paulo',
+            'VIDA': 'Ex: João da Silva, CPF 123.456.789-00',
+            'CELULAR': 'Ex: iPhone 13 Pro Max, IMEI 123456789012345'
+        };
+
+        // Listener para mudar placeholder conforme tipo selecionado
+        const tipoSelectCreate = formBem.querySelector('select[name="tipo"]');
+        const descricaoCreate = formBem.querySelector('textarea[name="descricao"]');
+
+        tipoSelectCreate.addEventListener('change', (e) => {
+            const tipoSelecionado = e.target.value;
+            if (tipoSelecionado && placeholdersPorTipo[tipoSelecionado]) {
+                descricaoCreate.placeholder = placeholdersPorTipo[tipoSelecionado];
+            } else {
+                descricaoCreate.placeholder = 'Ex: Toyota Corolla 2020, branco';
+            }
+        });
+
+        // Listener para mudar placeholder no formulário de edição
 
         // Abrir/fechar modal
         btnNovoBem.addEventListener('click', () => {
@@ -328,6 +351,12 @@
             document.querySelector('#tipo-edit').value = bem.tipo;
             document.querySelector('#descricao-edit').value = bem.descricao || '';
 
+            // Atualizar placeholder conforme o tipo
+            const descricaoEditField = document.querySelector('#descricao-edit');
+            if (bem.tipo && placeholdersPorTipo[bem.tipo]) {
+                descricaoEditField.placeholder = placeholdersPorTipo[bem.tipo];
+            }
+
             const modalEditar = document.querySelector('#modal-editar-bem');
             modalEditar.classList.add('open');
 
@@ -358,6 +387,19 @@
             } catch (error) {
                 document.querySelector('#msg-editar-bem').textContent = 'Erro ao atualizar bem: ' + error.message;
                 document.querySelector('#msg-editar-bem').className = 'status-message error';
+            }
+        });
+
+        // Listener para mudar placeholder no tipo-edit
+        const tipoSelectEdit = document.querySelector('#tipo-edit');
+        const descricaoEdit = document.querySelector('#descricao-edit');
+
+        tipoSelectEdit.addEventListener('change', (e) => {
+            const tipoSelecionado = e.target.value;
+            if (tipoSelecionado && placeholdersPorTipo[tipoSelecionado]) {
+                descricaoEdit.placeholder = placeholdersPorTipo[tipoSelecionado];
+            } else {
+                descricaoEdit.placeholder = 'Ex: Toyota Corolla 2020, branco';
             }
         });
 
