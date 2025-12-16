@@ -106,6 +106,12 @@ async function buildErrorMessage(response) {
     if (contentType.includes('application/json')) {
         try {
             const body = JSON.parse(text);
+
+
+            if (body?.messages && typeof body.messages === 'object') {
+                return Object.values(body.messages).join('\n');
+            }
+
             return body?.message || body?.error || JSON.stringify(body);
         } catch (err) {
             return text;
