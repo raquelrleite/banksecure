@@ -337,11 +337,12 @@ public class ApoliceServiceTest {
 
     @Test
     void deveExpirarApoliceVencida(){
-        apolice.setFimVigencia(LocalDate.now().minusDays(1));
-        apolice.setStatus(ApoliceStatus.ATIVA);
+        Apolice apoliceAntiga = new Apolice();
 
-        when(repository.findAll()).thenReturn(List.of(apolice));
+        apoliceAntiga.setFimVigencia(LocalDate.now().minusDays(1));
+        apoliceAntiga.setStatus(ApoliceStatus.ATIVA);
 
+        when(repository.findById(any())).thenReturn(Optional.of(apoliceAntiga));
         service.apolices(1L);
 
         ArgumentCaptor<Apolice> captor = ArgumentCaptor.forClass(Apolice.class);

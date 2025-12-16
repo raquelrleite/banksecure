@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static br.com.banksecure.app.enums.ErrorMessage.BEM_NAO_ENCONTRADO;
@@ -137,5 +138,31 @@ public class BemServiceTest {
                 () -> service.atualizar(bem.getId(), update, 1L));
 
         assertEquals(BEM_NAO_ENCONTRADO.getMessage(), ex.getMessage());
+    }
+
+    @Test
+    void deveListarBensPorClienteComSucesso(){
+        when(repository.findByClienteId(cliente.getId())).thenReturn(List.of(bem));
+        when(mapper.converterParaResponse(bem)).thenReturn(response);
+
+        List<BemResponse> resultado = service.listarPorCliente(cliente.getId(), 1L);
+
+        assertNotNull(resultado);
+        assertFalse(resultado.isEmpty());
+        assertEquals(1, resultado.size());
+        assertEquals(response, resultado.get(0));
+    }
+
+    @Test
+    void deveListarBensSemFiltrarPorClienteComSucesso(){
+        when(repository.findAll()).thenReturn(List.of(bem));
+        when(mapper.converterParaResponse(bem)).thenReturn(response);
+
+        List<BemResponse> resultado = service.listarPorCliente(null, 1L);
+
+        assertNotNull(resultado);
+        assertFalse(resultado.isEmpty());
+        assertEquals(1, resultado.size());
+        assertEquals(response, resultado.get(0));
     }
 }
