@@ -338,11 +338,11 @@ public class ApoliceServiceTest {
     @Test
     void deveExpirarApoliceVencida(){
         Apolice apoliceAntiga = new Apolice();
-
         apoliceAntiga.setFimVigencia(LocalDate.now().minusDays(1));
         apoliceAntiga.setStatus(ApoliceStatus.ATIVA);
 
-        when(repository.findById(any())).thenReturn(Optional.of(apoliceAntiga));
+        when(repository.findAll()).thenReturn(List.of(apoliceAntiga));
+
         service.apolices(1L);
 
         ArgumentCaptor<Apolice> captor = ArgumentCaptor.forClass(Apolice.class);
@@ -369,6 +369,26 @@ public class ApoliceServiceTest {
         Apolice apoliceSalva = captor.getValue();
         assertEquals(ApoliceStatus.ATIVA, apoliceSalva.getStatus());
 
+    }
+
+    @Test
+    void deveRetonarApoliceQuandoAindaNaoVenceu(){
+        Apolice apoliceAntiga = new Apolice();
+        apoliceAntiga.setFimVigencia(LocalDate.now().plusDays(2));
+        apoliceAntiga.setSeguro(seguroResidencial);
+        apoliceAntiga.setCliente(clienteMaiorIdade);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(apoliceAntiga));
+        when(repository.save(any(Apolice.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.renovar(1L, 1L);
+
+        ArgumentCaptor<Apolice> captor = ArgumentCaptor.forClass(Apolice.class);
+        verify(repository, times(2)).save(captor.capture());
+
+        Apolice novaApolice = captor.getValue();
+
+        assertEquals(apoliceAntiga.getFimVigencia().plusDays(1), novaApolice.getInicioVigencia());
     }
 
     @Test
