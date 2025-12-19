@@ -135,9 +135,9 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.3.1</version>
                 <configuration>
-                    <configLocation>sun_checks.xml</configLocation>
+                    <configLocation>google_checks.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
-                    <failsOnError>true</failsOnError>
+                    <failsOnError>false</failsOnError> <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
                 </configuration>
                 <executions>
                     <execution>

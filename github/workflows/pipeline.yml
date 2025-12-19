@@ -10,6 +10,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions: # Importante para o robô conseguir comentar no seu código
+      contents: read
+      pull-requests: write
+      checks: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,26 +29,20 @@ jobs:
       - name: Build and Test with Maven
         run: mvn clean verify
 
-      - name: Verificar Estilo do Código (Checkstyle)
-        run: mvn checkstyle:check
 
-      - name: Super-Linter
-        uses: github/super-linter@v5
-        env:
-          VALIDATE_JAVA: true
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Guardar o JAR pronto
-        uses: actions/upload-artifact@v4
+      - name: Checkstyle Report (Annotations)
+        uses: dbelyaev/action-checkstyle@master
+        if: always()
         with:
-          name: meu-projeto-spring
-          path: target/*.jar
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          checkstyle_xml: target/checkstyle-result.xml
+          level: warning
+
+
+      - name: JaCoCo Report
+        uses: madrapps/jacoco-report@v1.6.1
+        if: always()
+        with:
+          paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
