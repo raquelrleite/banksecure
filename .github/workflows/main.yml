@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions: # Importante para o robô conseguir comentar no seu código
+    permissions:
       contents: read
       pull-requests: write
       checks: write
@@ -29,15 +29,13 @@ jobs:
       - name: Build and Test with Maven
         run: mvn clean verify
 
-
       - name: Checkstyle Report (Annotations)
-        uses: dbelyaev/action-checkstyle@master
+        uses: dbelyaev/action-checkstyle@v0.1.6
         if: always()
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          checkstyle_xml: target/checkstyle-result.xml
+          github_token: ${{ secrets.GITHUB_TOKEN }} # Alinhado aqui!
+          xml_path: target/checkstyle-result.xml
           level: warning
-
 
       - name: JaCoCo Report
         uses: madrapps/jacoco-report@v1.6.1
