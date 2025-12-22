@@ -1,0 +1,58 @@
+name: Pipeline
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build Spring Boot JAR with Maven
+        run: |
+          mvn clean package
+          cp target/pipeline.jar pipeline.jar
+      
+
+      - name: Create Directory on VPS
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: 92.112.176.197
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: mkdir -p pipeline/pipeline
+
+      - name: Copy JAR to VPS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: 92.112.176.197
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "pipeline.jar"
+          target: "pipeline/pipeline/"
+
+      - name: Restart Backend Service
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: 92.112.176.197
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Tenta reiniciar, mas não falha se o serviço não existir ainda
+            systemctl restart pipeline.service || true 
+            systemctl status pipeline.service --no-pager || true
