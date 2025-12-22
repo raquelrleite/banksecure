@@ -1,13 +1,12 @@
 # BUILD
-FROM maven:3.9.9-eclipse-temurin-21 AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
-RUN mvn clean package -Dmaven.test.skip=true
+COPY . .
+RUN mvn clean package -DskipTests
 
 # RUNTIME
-FROM eclipse-temurin:21-jre
-WORKDIR /app
-COPY --from=builder /app/target/banksecure-*.jar app.jar
-EXPOSE 10000
-CMD ["java", "-jar", "app.jar"]
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /ap
+COPY --from=build /app/target/pipeline.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","app.jar"]
