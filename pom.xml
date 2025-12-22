@@ -24,8 +24,8 @@
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <lombok.version>1.18.30</lombok.version>
 
-        <sonar.organization>nome-da-sua-org-no-sonar</sonar.organization>
-        <sonar.projectKey>chave-do-projeto-no-sonar</sonar.projectKey>
+        <sonar.organization>raquelrleite</sonar.organization>
+        <sonar.projectKey>raquelrleite_banksecure</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
