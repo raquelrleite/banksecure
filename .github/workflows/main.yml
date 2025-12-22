@@ -22,5 +22,8 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Build and Test
-        run: mvn clean package
+      - name: Build, Test and Analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dspring.profiles.active=test
