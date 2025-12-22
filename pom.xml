@@ -69,6 +69,8 @@
     </dependencies>
 
     <build>
+        <finalName>pipeline</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -137,7 +139,8 @@
                 <configuration>
                     <configLocation>google_checks.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
-                    <failsOnError>false</failsOnError> <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
+                    <failsOnError>false</failsOnError>
+                    <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
                 </configuration>
                 <executions>
                     <execution>
