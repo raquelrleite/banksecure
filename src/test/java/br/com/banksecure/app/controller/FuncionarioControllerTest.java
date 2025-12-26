@@ -13,8 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.format.DateTimeFormatter;
-
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -24,8 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class FuncionarioControllerTest {
 
     private static final String URL_BASE = "/funcionarios";
-    private static final String HEADER_FUNC_ID = "X-Funcionario-Id";
-    private static final Long ID_PADRAO = 1L;
 
 
     @Autowired

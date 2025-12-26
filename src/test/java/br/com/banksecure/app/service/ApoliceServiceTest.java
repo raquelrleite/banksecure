@@ -392,7 +392,7 @@ public class ApoliceServiceTest {
                 .withStatus(ApoliceStatus.ATIVA)
                 .build();
 
-        when(repository.findById(1L)).thenReturn(Optional.of(apolice));
+        when(repository.findById(1L)).thenReturn(Optional.of(apoliceAntiga));
         when(repository.save(any(Apolice.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(mapper.converterParaResponse(any())).thenReturn(response);
 
@@ -406,15 +406,14 @@ public class ApoliceServiceTest {
         Apolice antigaAtualizada = apolicesSalva.get(0);
         Apolice novaCriada = apolicesSalva.get(1);
 
-        assertEquals(apolice.getId(), antigaAtualizada.getId());
+        assertEquals(apoliceAntiga.getId(), antigaAtualizada.getId());
         assertEquals(ApoliceStatus.RENOVADA, antigaAtualizada.getStatus());
 
         assertEquals(ApoliceStatus.ATIVA, novaCriada.getStatus());
         assertNotEquals(antigaAtualizada.getId(), novaCriada.getId());
-        assertEquals(apolice.getCliente(), novaCriada.getCliente());
+        assertEquals(apoliceAntiga.getCliente(), novaCriada.getCliente());
 
-        assertTrue(novaCriada.getInicioVigencia().isAfter(apolice.getInicioVigencia()));
-
+        assertTrue(novaCriada.getInicioVigencia().isAfter(apoliceAntiga.getInicioVigencia()));
     }
 
     @Test

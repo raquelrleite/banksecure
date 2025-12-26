@@ -9,13 +9,9 @@ import br.com.banksecure.app.enums.ApoliceStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static br.com.banksecure.app.builder.BemBuilder.umBem;
-import static br.com.banksecure.app.builder.ClienteBuilder.umCliente;
-import static br.com.banksecure.app.builder.SeguroBuilder.umSeguro;
-
 public class ApoliceBuilder {
 
-    private Apolice apolice;
+    private final Apolice apolice;
 
     private ApoliceBuilder() {
         apolice = new Apolice();

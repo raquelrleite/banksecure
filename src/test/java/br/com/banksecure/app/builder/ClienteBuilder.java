@@ -5,7 +5,7 @@ import br.com.banksecure.app.domain.Cliente;
 import java.time.LocalDate;
 
 public class ClienteBuilder {
-    private Cliente cliente;
+    private final Cliente cliente;
 
     private ClienteBuilder() {
         cliente = new Cliente();
