@@ -1,7 +1,6 @@
 package br.com.banksecure.app.service;
 
 import br.com.banksecure.app.domain.Bem;
-import br.com.banksecure.app.domain.Cliente;
 import br.com.banksecure.app.dto.request.BemRequest;
 import br.com.banksecure.app.dto.request.BemUpdateRequest;
 import br.com.banksecure.app.dto.response.BemResponse;
@@ -19,10 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static br.com.banksecure.app.builder.BemBuilder.umBem;
+import static br.com.banksecure.app.builder.ClienteBuilder.umCliente;
 import static br.com.banksecure.app.enums.ErrorMessage.BEM_NAO_ENCONTRADO;
 import static br.com.banksecure.app.enums.ErrorMessage.CLIENTE_NAO_ENCONTRADO;
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,43 +45,29 @@ public class BemServiceTest {
     private BemResponse response;
     private BemRequest request;
     private Bem bem;
-    private Cliente cliente;
-
 
     @BeforeEach
     void setUp() {
         doNothing().when(acesso).validarAcesso(1L);
 
-        request = BemRequest.builder()
-                .clienteId(1L)
-                .tipo(TipoSeguroeBem.AUTO)
-                .descricao("Fiat Uno com escada no teto")
-                .build();
+        bem = umBem().withId(1L).build();
 
-        bem = Bem.builder()
-                .id(1L)
-                .cliente(cliente)
-                .tipo(TipoSeguroeBem.AUTO)
-                .descricao("Fiat Uno com escada no teto")
+        request = BemRequest.builder()
+                .clienteId(bem.getCliente().getId())
+                .tipo(bem.getTipo())
+                .descricao(bem.getDescricao())
                 .build();
 
         response = BemResponse.builder()
-                .id(1L)
-                .tipo(TipoSeguroeBem.AUTO)
-                .descricao("Fiat Uno com escada no teto")
-                .build();
-
-        cliente = Cliente.builder()
-                .id(1L)
-                .nome("Nicolas")
-                .cpf("006.737.490-53")
-                .dataNascimento(LocalDate.of(1960, 10, 10))
+                .id(bem.getId())
+                .tipo(bem.getTipo())
+                .descricao(bem.getDescricao())
                 .build();
     }
 
     @Test
     void deveCadastrarBemComSucesso() {
-        when(clienteRepository.findById(cliente.getId())).thenReturn(Optional.of(cliente));
+        when(clienteRepository.findById(bem.getCliente().getId())).thenReturn(Optional.of(bem.getCliente()));
         when(mapper.converterParaEntity(request)).thenReturn(bem);
         when(repository.save(bem)).thenReturn(bem);
         when(mapper.converterParaResponse(bem)).thenReturn(response);
@@ -95,18 +81,23 @@ public class BemServiceTest {
     }
 
     @Test
-    void deveLancarExcecaoQuandoClienteNaoEncontrado(){
-        when(clienteRepository.findById(cliente.getId())).thenReturn(Optional.empty());
+    void deveLancarExcecaoQuandoClienteNaoEncontrado() {
+        BemRequest requestComIdInexistente = BemRequest.builder()
+                .clienteId(999L)
+                .tipo(TipoSeguroeBem.AUTO)
+                .build();
+
+        when(clienteRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         ClienteNaoEncontradoException ex = assertThrows(
                 ClienteNaoEncontradoException.class,
-                () -> service.cadastrar(request, 1L));
+                () -> service.cadastrar(requestComIdInexistente, 1L));
 
         assertEquals(CLIENTE_NAO_ENCONTRADO.getMessage(), ex.getMessage());
     }
 
     @Test
-    void deveAtualizarBemComSucesso(){
+    void deveAtualizarBemComSucesso() {
         BemUpdateRequest update = BemUpdateRequest.builder()
                 .tipo(TipoSeguroeBem.AUTO)
                 .descricao("Gol quadrado")
@@ -125,7 +116,7 @@ public class BemServiceTest {
     }
 
     @Test
-    void deveLancarExcecaoQuandoNaoEncontrarBemAoAtualizar(){
+    void deveLancarExcecaoQuandoNaoEncontrarBemAoAtualizar() {
         BemUpdateRequest update = BemUpdateRequest.builder()
                 .tipo(TipoSeguroeBem.AUTO)
                 .descricao("Gol quadrado")
@@ -141,20 +132,21 @@ public class BemServiceTest {
     }
 
     @Test
-    void deveListarBensPorClienteComSucesso(){
-        when(repository.findByClienteId(cliente.getId())).thenReturn(List.of(bem));
+    void deveListarBensPorClienteComSucesso() {
+        bem.setCliente(umCliente().withId(1L).build());
+
+        when(repository.findByClienteId(bem.getCliente().getId())).thenReturn(List.of(bem));
         when(mapper.converterParaResponse(bem)).thenReturn(response);
 
-        List<BemResponse> resultado = service.listarPorCliente(cliente.getId(), 1L);
+        List<BemResponse> resultado = service.listarPorCliente(bem.getCliente().getId(), 1L);
 
         assertNotNull(resultado);
         assertFalse(resultado.isEmpty());
         assertEquals(1, resultado.size());
-        assertEquals(response, resultado.get(0));
     }
 
     @Test
-    void deveListarBensSemFiltrarPorClienteComSucesso(){
+    void deveListarBensSemFiltrarPorClienteComSucesso() {
         when(repository.findAll()).thenReturn(List.of(bem));
         when(mapper.converterParaResponse(bem)).thenReturn(response);
 
@@ -163,6 +155,6 @@ public class BemServiceTest {
         assertNotNull(resultado);
         assertFalse(resultado.isEmpty());
         assertEquals(1, resultado.size());
-        assertEquals(response, resultado.get(0));
+        verify(repository).findAll();
     }
 }

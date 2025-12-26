@@ -26,6 +26,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ClienteController.class)
 public class ClienteControllerTest {
 
+    private static final String URL_BASE = "/clientes";
+    private static final String HEADER_FUNC_ID = "X-Funcionario-Id";
+    private static final Long ID_PADRAO = 1L;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -40,33 +46,32 @@ public class ClienteControllerTest {
 
     @BeforeEach
     void setUp() {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         request = ClienteRequest.builder()
                 .nome("João da Silva")
                 .cpf("983.107.290-14")
-                .dataNascimento(LocalDate.parse("15/01/2000", fmt))
+                .dataNascimento(LocalDate.parse("15/01/2000", FORMATTER))
                 .build();
 
         response = ClienteResponse.builder()
-                .id(1L)
+                .id(ID_PADRAO)
                 .nome("João da Silva")
                 .cpf("983.107.290-14")
-                .dataNascimento(LocalDate.parse("15/01/2000", fmt))
+                .dataNascimento(LocalDate.parse("15/01/2000", FORMATTER))
                 .build();
     }
 
     @Test
     void cadastrar() throws Exception {
-        when(service.cadastrar(request, 1L)).thenReturn(response);
+        when(service.cadastrar(request, ID_PADRAO)).thenReturn(response);
 
-        mockMvc.perform(post("/clientes")
+        mockMvc.perform(post(URL_BASE)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Funcionario-Id", 1L)
+                        .header(HEADER_FUNC_ID, ID_PADRAO)
                         .content(objectMapper.writeValueAsString(request)))
 
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.id").value(ID_PADRAO))
                 .andExpect(jsonPath("$.nome").value("João da Silva"))
                 .andExpect(jsonPath("$.cpf").value("983.107.290-14"))
                 .andExpect(jsonPath("$.dataNascimento").value("15/01/2000"));
@@ -74,13 +79,13 @@ public class ClienteControllerTest {
 
     @Test
     void listarTodosClientes() throws Exception {
-        when(service.listarTodosClientes(1L)).thenReturn(List.of(response));
+        when(service.listarTodosClientes(ID_PADRAO)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/clientes")
-                        .header("X-Funcionario-Id", 1L))
+        mockMvc.perform(get(URL_BASE)
+                        .header(HEADER_FUNC_ID, ID_PADRAO))
 
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].id").value(ID_PADRAO))
                 .andExpect(jsonPath("$.length()").value(1));
     }
 }

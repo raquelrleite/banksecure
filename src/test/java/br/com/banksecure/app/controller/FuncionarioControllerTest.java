@@ -13,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.format.DateTimeFormatter;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -20,6 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(FuncionarioController.class)
 public class FuncionarioControllerTest {
+
+    private static final String URL_BASE = "/funcionarios";
+    private static final String HEADER_FUNC_ID = "X-Funcionario-Id";
+    private static final Long ID_PADRAO = 1L;
+
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -53,7 +61,7 @@ public class FuncionarioControllerTest {
     void deveCadastrarFuncionarioComSucesso() throws Exception {
         when(service.cadastrar(request)).thenReturn(response);
 
-        mockMvc.perform(post("/funcionarios")
+        mockMvc.perform(post(URL_BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
 
@@ -73,7 +81,7 @@ public class FuncionarioControllerTest {
 
         when(service.login(loginRequest)).thenReturn(response);
 
-        mockMvc.perform(post("/funcionarios/login")
+        mockMvc.perform(post(URL_BASE + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
 

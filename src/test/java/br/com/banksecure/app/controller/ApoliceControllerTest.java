@@ -30,6 +30,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ApoliceController.class)
 public class ApoliceControllerTest {
 
+    private static final String URL_BASE = "/apolices";
+    private static final String HEADER_FUNC_ID = "X-Funcionario-Id";
+    private static final Long ID_PADRAO = 1L;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -46,17 +51,13 @@ public class ApoliceControllerTest {
 
     @BeforeEach
     void setUp() {
-
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        LocalDate inicio = LocalDate.parse("14/12/2025", fmt);
-
-        LocalDate fim = LocalDate.parse("14/12/2026", fmt);
+        LocalDate inicio = LocalDate.now();
+        LocalDate fim = inicio.plusYears(1);
 
         request = ApoliceRequest.builder()
-                .clienteId(1L)
-                .seguroId(1L)
-                .bemId(1L)
+                .clienteId(ID_PADRAO)
+                .seguroId(ID_PADRAO)
+                .bemId(ID_PADRAO)
                 .build();
 
         updateRequest = ApoliceUpdateRequest.builder()
@@ -65,15 +66,15 @@ public class ApoliceControllerTest {
                 .build();
 
         responseUpdate = ApoliceResponse.builder()
-                .id(1L)
+                .id(ID_PADRAO)
                 .inicioVigencia(inicio.plusYears(1))
                 .fimVigencia(fim.plusYears(1))
                 .build();
 
         response = ApoliceResponse.builder()
-                .id(1L)
-                .clienteId(1L)
-                .seguroId(1L)
+                .id(ID_PADRAO)
+                .clienteId(ID_PADRAO)
+                .seguroId(ID_PADRAO)
                 .valorFinal(new BigDecimal("100.00"))
                 .inicioVigencia(inicio)
                 .fimVigencia(fim)
@@ -83,42 +84,43 @@ public class ApoliceControllerTest {
 
     @Test
     void deveGerarApoliceComSucesso() throws Exception {
-        when(service.gerarApolice(any(ApoliceRequest.class), eq(1L)))
+        when(service.gerarApolice(any(ApoliceRequest.class), eq(ID_PADRAO)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/apolices")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("X-Funcionario-Id", 1L)
-                .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(post(URL_BASE)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HEADER_FUNC_ID, ID_PADRAO)
+                        .content(objectMapper.writeValueAsString(request)))
 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(response.id()))
+                .andExpect(jsonPath("$.valorFinal").value(100.00))
                 .andExpect(jsonPath("$.status").value(response.status().name()));
     }
 
     @Test
     void deveListarApolicesAVencer() throws Exception {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        when(service.apolicesAvencer(1L)).thenReturn(List.of(response));
+        when(service.apolicesAvencer(ID_PADRAO)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/apolices")
+        mockMvc.perform(get(URL_BASE)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Funcionario-Id", 1L))
+                        .header(HEADER_FUNC_ID, ID_PADRAO))
 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(response.id()))
-                .andExpect(jsonPath("$[0].inicioVigencia").value(response.inicioVigencia().format(fmt)))
-                .andExpect(jsonPath("$[0].fimVigencia").value(response.fimVigencia().format(fmt)))
+                .andExpect(jsonPath("$[0].inicioVigencia").value(response.inicioVigencia().format(FORMATTER)))
+                .andExpect(jsonPath("$[0].fimVigencia").value(response.fimVigencia().format(ApoliceControllerTest.FORMATTER)))
                 .andExpect(jsonPath("$[0].status").value(response.status().name()));
     }
 
     @Test
     void renovar() throws Exception {
-        when(service.renovar(1L, 1L)).thenReturn(response);
+        when(service.renovar(ID_PADRAO, ID_PADRAO)).thenReturn(response);
 
-        mockMvc.perform(post("/apolices/renovar/{apoliceId}", 1L)
-                        .header("X-Funcionario-Id", 1L))
+        mockMvc.perform(post(URL_BASE + "/renovar/{apoliceId}", ID_PADRAO)
+                        .header(HEADER_FUNC_ID, ID_PADRAO))
 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(response.id()))
@@ -127,38 +129,38 @@ public class ApoliceControllerTest {
 
     @Test
     void deveAtualizarApolice() throws Exception {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        when(service.atualizar(eq(1L), any(ApoliceUpdateRequest.class), eq(1L)))
+        when(service.atualizar(eq(ID_PADRAO), any(ApoliceUpdateRequest.class), eq(ID_PADRAO)))
                 .thenReturn(responseUpdate);
 
-        mockMvc.perform(patch("/apolices/{apoliceId}", 1L)
+        mockMvc.perform(patch("/apolices/{apoliceId}", ID_PADRAO)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Funcionario-Id", 1L)
+                        .header(HEADER_FUNC_ID, ID_PADRAO)
                         .content(objectMapper.writeValueAsString(updateRequest)))
 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(responseUpdate.id()))
-                .andExpect(jsonPath("$.inicioVigencia").value(responseUpdate.inicioVigencia().format(fmt)))
-                .andExpect(jsonPath("$.fimVigencia").value(responseUpdate.fimVigencia().format(fmt)));
+                .andExpect(jsonPath("$.inicioVigencia").value(responseUpdate.inicioVigencia().format(FORMATTER)))
+                .andExpect(jsonPath("$.fimVigencia").value(responseUpdate.fimVigencia().format(FORMATTER)));
     }
 
     @Test
     void cancelar() throws Exception {
-        doNothing().when(service).cancelar(1L, 1L);
+        doNothing().when(service).cancelar(ID_PADRAO, ID_PADRAO);
 
-        mockMvc.perform(put("/apolices/cancelar/{apoliceId}", 1L)
-                .header("X-Funcionario-Id", 1L))
+        mockMvc.perform(put("/apolices/cancelar/{apoliceId}", ID_PADRAO)
+                .header(HEADER_FUNC_ID, ID_PADRAO))
 
                 .andExpect(status().isOk());
     }
 
     @Test
     void deveListarTodasApolices() throws Exception {
-        when(service.apolices(1L)).thenReturn(List.of(response));
+        when(service.apolices(ID_PADRAO)).thenReturn(List.of(response));
 
         mockMvc.perform(get("/apolices/lista")
-                .header("X-Funcionario-Id", 1L))
+                .header(HEADER_FUNC_ID, ID_PADRAO))
 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(response.id()))
