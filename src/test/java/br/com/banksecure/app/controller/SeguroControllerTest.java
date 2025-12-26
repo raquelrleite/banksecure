@@ -5,14 +5,14 @@ import br.com.banksecure.app.dto.request.SeguroUpdateRequest;
 import br.com.banksecure.app.dto.response.SeguroResponse;
 import br.com.banksecure.app.enums.TipoSeguroeBem;
 import br.com.banksecure.app.service.SeguroService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,6 +24,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(SeguroController.class)
 public class SeguroControllerTest {
+
+    private static final String URL_BASE = "/seguros";
+    private static final String HEADER_FUNC_ID = "X-Funcionario-Id";
+    private static final Long ID_PADRAO = 1L;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -56,11 +61,11 @@ public class SeguroControllerTest {
 
     @Test
     void deveCadastrarSeguroComSucesso() throws Exception {
-        when(service.cadastrar(request, 1L)).thenReturn(response);
+        when(service.cadastrar(request, ID_PADRAO)).thenReturn(response);
 
-        mockMvc.perform(post("/seguros")
+        mockMvc.perform(post(URL_BASE)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Funcionario-Id", 1L)
+                        .header(HEADER_FUNC_ID, ID_PADRAO)
                         .content(objectMapper.writeValueAsString(request)))
 
                 .andExpect(status().isOk())
@@ -74,7 +79,7 @@ public class SeguroControllerTest {
     void deveListarTodosSeguros() throws Exception {
         when(service.listarTodos()).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/seguros"))
+        mockMvc.perform(get(URL_BASE))
 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(response.id()));
@@ -89,18 +94,18 @@ public class SeguroControllerTest {
                 .build();
 
         SeguroResponse updateResponse = SeguroResponse.builder()
-                .id(1L)
+                .id(ID_PADRAO)
                 .titulo("Seguro Celular Essencial")
                 .coberturaMinima("Apenas roubo.")
                 .valorPremioBase(new BigDecimal("57.90"))
                 .tipo(TipoSeguroeBem.CELULAR)
                 .build();
 
-    when(service.atualizar(1L, updateRequest, 1L)).thenReturn(updateResponse);
+    when(service.atualizar(ID_PADRAO, updateRequest, ID_PADRAO)).thenReturn(updateResponse);
 
-    mockMvc.perform(patch("/seguros/{seguroId}", 1L)
+    mockMvc.perform(patch("/seguros/{seguroId}", ID_PADRAO)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("X-Funcionario-Id", 1L)
+                    .header(HEADER_FUNC_ID, ID_PADRAO)
                     .content(objectMapper.writeValueAsString(updateRequest)))
 
             .andExpect(status().isOk())
@@ -112,8 +117,8 @@ public class SeguroControllerTest {
 
     @Test
     void deveExcluirSeguroComSucesso() throws Exception {
-        mockMvc.perform(delete("/seguros/{seguroId}", 1L)
-                        .header("X-Funcionario-Id", 1L))
+        mockMvc.perform(delete("/seguros/{seguroId}", ID_PADRAO)
+                        .header(HEADER_FUNC_ID, ID_PADRAO))
 
                 .andExpect(status().isOk());
     }

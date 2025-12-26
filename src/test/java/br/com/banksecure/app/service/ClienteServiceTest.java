@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 
+import static br.com.banksecure.app.builder.ClienteBuilder.umCliente;
 import static br.com.banksecure.app.enums.ErrorMessage.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -41,12 +42,7 @@ public class ClienteServiceTest {
     @BeforeEach
     void setUp(){
         doNothing().when(acesso).validarAcesso(1L);
-        cliente = Cliente.builder()
-                .id(1L)
-                .nome("Nicolas")
-                .cpf("006.737.490-53")
-                .dataNascimento(LocalDate.of(1960, 10, 10))
-                .build();
+        cliente = umCliente().build();
 
         request = ClienteRequest.builder()
                 .nome("Nicolas")
@@ -96,11 +92,12 @@ public class ClienteServiceTest {
                 .dataNascimento(LocalDate.of(2020, 4, 10))
                 .build();
 
-        Cliente clienteMenor = Cliente.builder()
-                .nome("Nicolas")
-                .cpf("006.737.490-53")
-                .dataNascimento(LocalDate.of(2020, 4, 10))
+
+        Cliente clienteMenor = umCliente()
+                .withCpf("212.660.780-10")
+                .withDataNascimento(LocalDate.of(2020, 4, 10))
                 .build();
+
 
         when(repository.existsByCpf(menorIdade.cpf())).thenReturn(false);
         when(mapper.converterParaEntity(menorIdade)).thenReturn(clienteMenor);
@@ -121,10 +118,9 @@ public class ClienteServiceTest {
                 .dataNascimento(LocalDate.of(1900, 4, 10))
                 .build();
 
-        Cliente clienteIdoso = Cliente.builder()
-                .nome("Nicolas")
-                .cpf("006.737.490-53")
-                .dataNascimento(LocalDate.of(1900, 4, 10))
+        Cliente clienteIdoso = umCliente()
+                .withDataNascimento(LocalDate.of(1900, 4, 10))
+                .withCpf("006.737.490-53")
                 .build();
 
         when(repository.existsByCpf(superIdoso.cpf())).thenReturn(false);

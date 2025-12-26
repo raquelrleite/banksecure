@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import static br.com.banksecure.app.builder.SeguroBuilder.umSeguro;
 import static br.com.banksecure.app.enums.ErrorMessage.SEGURO_JA_EXISTE;
 import static br.com.banksecure.app.enums.ErrorMessage.SEGURO_NAO_ENCONTRADO;
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,13 +46,7 @@ public class SeguroServiceTest {
 
     @BeforeEach
     void setUp() {
-        seguro = Seguro.builder()
-                .id(1L)
-                .titulo("Seguro Residencial")
-                .coberturaMinima("Incêndio, Roubo")
-                .valorPremioBase(new BigDecimal("1500.00"))
-                .tipo(TipoSeguroeBem.RESIDENCIAL)
-                .build();
+        seguro = umSeguro().build();
 
         request = SeguroRequest.builder()
                 .titulo("Seguro Residencial")

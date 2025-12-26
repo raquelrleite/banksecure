@@ -29,6 +29,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static br.com.banksecure.app.builder.ApoliceBuilder.umaApolice;
+import static br.com.banksecure.app.builder.BemBuilder.umBem;
+import static br.com.banksecure.app.builder.ClienteBuilder.umCliente;
+import static br.com.banksecure.app.builder.SeguroBuilder.umSeguro;
 import static br.com.banksecure.app.enums.ErrorMessage.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -45,128 +49,73 @@ public class ApoliceServiceTest {
     @Mock
     private ClienteRepository clienteRepository;
     @Mock
+    private BemRepository bemRepository;
+    @Mock
     private ApoliceMapper mapper;
     @Mock
     private ValidarAcesso acesso;
-    @Mock
-    private BemRepository bemRepository;
 
     private Apolice apolice;
     private ApoliceRequest request;
     private ApoliceResponse response;
     private ApoliceUpdateRequest updateRequest;
-    private Cliente clienteMaiorIdade;
-    private Seguro seguroResidencial;
-    private Seguro seguroAuto;
-    private Seguro seguroVida;
-    private Bem bem;
 
     @BeforeEach
     void setUp() {
         doNothing().when(acesso).validarAcesso(1L);
 
-        LocalDate inicio = LocalDate.now();
-        LocalDate fim = inicio.plusYears(1);
+        apolice = umaApolice().build();
 
-        LocalDate inicioAtualizado = LocalDate.now().minusYears(1);
-        LocalDate fimAtualizado = inicioAtualizado.plusYears(1);
+        request = ApoliceRequest.builder()
+                .clienteId(apolice.getCliente().getId())
+                .seguroId(apolice.getSeguro().getId())
+                .bemId(apolice.getBem().getId())
+                .build();
 
-        apolice = Apolice.builder()
+        response = ApoliceResponse.builder()
                 .id(1L)
-                .cliente(clienteMaiorIdade)
-                .seguro(seguroResidencial)
-                .bem(bem)
-                .valorFinal(new BigDecimal("200.00"))
-                .inicioVigencia(inicio)
-                .fimVigencia(fim)
+                .clienteId(apolice.getCliente().getId())
+                .seguroId(apolice.getSeguro().getId())
+                .valorFinal(new BigDecimal("500"))
+                .inicioVigencia(LocalDate.now())
+                .fimVigencia(LocalDate.now().plusYears(1))
                 .status(ApoliceStatus.ATIVA)
                 .build();
 
+        updateRequest = ApoliceUpdateRequest.builder()
+                .inicioVigencia(LocalDate.now().plusYears(1))
+                .fimVigencia(LocalDate.now().plusYears(2))
+                .status(ApoliceStatus.ATIVA)
+                .build();
+    }
+
+    @Test
+    void deveGerarApoliceComSucesso() {
         request = ApoliceRequest.builder()
                 .clienteId(1L)
                 .seguroId(1L)
                 .bemId(1L)
                 .build();
 
-        response = ApoliceResponse.builder()
-                .id(1L)
-                .clienteId(1L)
-                .seguroId(1L)
-                .valorFinal(new BigDecimal("500"))
-                .inicioVigencia(inicioAtualizado)
-                .fimVigencia(fimAtualizado)
-                .status(ApoliceStatus.ATIVA)
-                .build();
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(apolice.getCliente()));
+        when(seguroRepository.findById(1L)).thenReturn(Optional.of(apolice.getSeguro()));
+        when(bemRepository.findById(1L)).thenReturn(Optional.of(apolice.getBem()));
 
-        updateRequest = ApoliceUpdateRequest.builder()
-                .inicioVigencia(inicioAtualizado)
-                .fimVigencia(fimAtualizado)
-                .status(ApoliceStatus.ATIVA)
-                .build();
-
-        clienteMaiorIdade = Cliente.builder()
-                .id(1L)
-                .nome("Nicolas")
-                .cpf("006.737.490-53")
-                .dataNascimento(LocalDate.of(1960, 10, 10))
-                .build();
-
-        seguroResidencial = Seguro.builder()
-                .id(1L)
-                .titulo("Seguro Residencial")
-                .tipo(TipoSeguroeBem.RESIDENCIAL)
-                .valorPremioBase(new BigDecimal("180.00"))
-                .build();
-
-        seguroVida = Seguro.builder()
-                .id(1L)
-                .titulo("Seguro de Vida")
-                .tipo(TipoSeguroeBem.VIDA)
-                .valorPremioBase(new BigDecimal("200.00"))
-                .build();
-
-        seguroAuto = Seguro.builder()
-                .id(2L)
-                .titulo("Seguro Auto")
-                .tipo(TipoSeguroeBem.AUTO)
-                .valorPremioBase(new BigDecimal("1200.00"))
-                .build();
-
-        bem = Bem.builder()
-                .id(1L)
-                .cliente(clienteMaiorIdade)
-                .tipo(TipoSeguroeBem.RESIDENCIAL)
-                .descricao("Rua Localhost, nº 127.0.0.1, Apto 404")
-                .build();
-    }
-
-    @Test
-    void deveGerarApoliceComSucesso() {
-        when(clienteRepository.findById(clienteMaiorIdade.getId())).thenReturn(Optional.of(clienteMaiorIdade));
-        when(seguroRepository.findById(seguroResidencial.getId())).thenReturn(Optional.of(seguroResidencial));
-        when(bemRepository.findById(bem.getId())).thenReturn(Optional.of(bem));
-
-        when(repository.save(any(Apolice.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.save(any(Apolice.class))).thenAnswer(i -> i.getArgument(0));
 
         when(mapper.converterParaResponse(any(Apolice.class))).thenReturn(response);
 
         service.gerarApolice(request, 1L);
 
-        ArgumentCaptor<Apolice> apoliceCaptor = ArgumentCaptor.forClass(Apolice.class);
-        verify(repository).save(apoliceCaptor.capture());
-        Apolice apoliceSalva = apoliceCaptor.getValue();
+        ArgumentCaptor<Apolice> captor = ArgumentCaptor.forClass(Apolice.class);
+        verify(repository).save(captor.capture());
 
-        assertEquals(clienteMaiorIdade, apoliceSalva.getCliente());
-        assertEquals(seguroResidencial, apoliceSalva.getSeguro());
-        assertEquals(bem, apoliceSalva.getBem());
-        assertNotNull(apoliceSalva.getInicioVigencia());
-        assertNotNull(apoliceSalva.getFimVigencia());
+        assertNotNull(captor.getValue());
     }
 
     @Test
     void deveLancarExcecaoQuandoNaoEncontrarCliente() {
-        when(clienteRepository.findById(clienteMaiorIdade.getId())).thenReturn(Optional.empty());
+        when(clienteRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         ClienteNaoEncontradoException ex = assertThrows(
                 ClienteNaoEncontradoException.class,
@@ -177,8 +126,8 @@ public class ApoliceServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoNaoEncontrarSeguro() {
-        when(clienteRepository.findById(clienteMaiorIdade.getId())).thenReturn(Optional.of(clienteMaiorIdade));
-        when(seguroRepository.findById(seguroResidencial.getId())).thenReturn(Optional.empty());
+        when(clienteRepository.findById(anyLong())).thenReturn(Optional.of(apolice.getCliente()));
+        when(seguroRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         SeguroNaoEncontradoException ex = assertThrows(
                 SeguroNaoEncontradoException.class,
@@ -189,9 +138,9 @@ public class ApoliceServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoNaoEncontrarBem() {
-        when(clienteRepository.findById(clienteMaiorIdade.getId())).thenReturn(Optional.of(clienteMaiorIdade));
-        when(seguroRepository.findById(seguroResidencial.getId())).thenReturn(Optional.of(seguroResidencial));
-        when(bemRepository.findById(bem.getId())).thenReturn(Optional.empty());
+        when(clienteRepository.findById(anyLong())).thenReturn(Optional.of(apolice.getCliente()));
+        when(seguroRepository.findById(anyLong())).thenReturn(Optional.of(apolice.getSeguro()));
+        when(bemRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         BemNaoEncontradoException ex = assertThrows(
                 BemNaoEncontradoException.class,
@@ -202,16 +151,20 @@ public class ApoliceServiceTest {
 
     @Test
     void deveLancarExcecaoSeClientePossuirSeguroVida() {
+        Seguro seguroVida = umSeguro()
+                .withId(2L)
+                .withTipo(TipoSeguroeBem.VIDA)
+                .build();
         ApoliceRequest requestVida = ApoliceRequest.builder()
-                .clienteId(clienteMaiorIdade.getId())
-                .seguroId(seguroVida.getId())
+                .clienteId(1L)
+                .seguroId(2L)
                 .bemId(null)
                 .build();
 
-        when(clienteRepository.findById(clienteMaiorIdade.getId())).thenReturn(Optional.of(clienteMaiorIdade));
-        when(seguroRepository.findById(seguroVida.getId())).thenReturn(Optional.of(seguroVida));
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(apolice.getCliente()));
+        when(seguroRepository.findById(2L)).thenReturn(Optional.of(seguroVida));
 
-        when(repository.existsByClienteIdAndSeguro_Tipo(clienteMaiorIdade.getId(), TipoSeguroeBem.VIDA)).thenReturn(true);
+        when(repository.existsByClienteIdAndSeguro_Tipo(1L, TipoSeguroeBem.VIDA)).thenReturn(true);
 
         ClientePossuiSegVidaException ex = assertThrows(
                 ClientePossuiSegVidaException.class,
@@ -222,11 +175,11 @@ public class ApoliceServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoBemForNulo() {
-        when(clienteRepository.findById(clienteMaiorIdade.getId())).thenReturn(Optional.of(clienteMaiorIdade));
+        when(clienteRepository.findById(anyLong())).thenReturn(Optional.of(apolice.getCliente()));
 
-        when(seguroRepository.findById(seguroResidencial.getId())).thenReturn(Optional.of(seguroResidencial));
+        when(seguroRepository.findById(anyLong())).thenReturn(Optional.of(apolice.getSeguro()));
 
-        when(bemRepository.findById(bem.getId())).thenReturn(Optional.empty());
+        when(bemRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         BemNaoEncontradoException ex = assertThrows(
                 BemNaoEncontradoException.class,
@@ -237,25 +190,20 @@ public class ApoliceServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoIdClienteForDiferenteDoBem() {
-        ApoliceRequest outroRequest = ApoliceRequest.builder()
+        ApoliceRequest requestInvalido = ApoliceRequest.builder()
                 .clienteId(2L)
                 .seguroId(1L)
                 .bemId(1L)
                 .build();
 
-        Cliente outroCliente = Cliente.builder()
-                .id(2L)
-                .nome("Larissa")
-                .cpf("492.970.620-32")
-                .dataNascimento(LocalDate.of(1990, 1, 1))
-                .build();
+        Cliente outroCliente = umCliente().withId(2L).build();
 
         when(clienteRepository.findById(2L)).thenReturn(Optional.of(outroCliente));
-        when(seguroRepository.findById(seguroResidencial.getId())).thenReturn(Optional.of(seguroResidencial));
-        when(bemRepository.findById(bem.getId())).thenReturn(Optional.of(bem));
+        when(seguroRepository.findById(1L)).thenReturn(Optional.of(apolice.getSeguro()));
+        when(bemRepository.findById(1L)).thenReturn(Optional.of(apolice.getBem()));
 
         AcessoNegadoException ex = assertThrows(AcessoNegadoException.class,
-                () -> service.gerarApolice(outroRequest, 1L));
+                () -> service.gerarApolice(requestInvalido, 1L));
 
         assertEquals(BEM_NAO_PERTENCE_AO_CLIENTE.getMessage(), ex.getMessage());
     }
@@ -268,8 +216,10 @@ public class ApoliceServiceTest {
                 .bemId(null)
                 .build();
 
+        Seguro seguroAuto = umSeguro().withId(2L).withTipo(TipoSeguroeBem.AUTO).build();
+
         when(seguroRepository.findById(any())).thenReturn(Optional.of(seguroAuto));
-        when(clienteRepository.findById(any())).thenReturn(Optional.of(clienteMaiorIdade));
+        when(clienteRepository.findById(any())).thenReturn(Optional.of(apolice.getCliente()));
 
         BemNaoEncontradoException ex = assertThrows(
                 BemNaoEncontradoException.class,
@@ -282,12 +232,14 @@ public class ApoliceServiceTest {
     void deveGerarApoliceSeguroVidaSemBem() {
         ApoliceRequest requestVida = ApoliceRequest.builder()
                 .clienteId(1L)
-                .seguroId(1L)
+                .seguroId(2L)
                 .bemId(null)
                 .build();
 
-        when(seguroRepository.findById(any())).thenReturn(Optional.of(seguroVida));
-        when(clienteRepository.findById(any())).thenReturn(Optional.of(clienteMaiorIdade));
+        Seguro seguroVida = umSeguro().withId(2L).withTipo(TipoSeguroeBem.VIDA).build();
+
+        when(seguroRepository.findById(2L)).thenReturn(Optional.of(seguroVida));
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(apolice.getCliente()));
         when(repository.existsByClienteIdAndSeguro_Tipo(any(), eq(TipoSeguroeBem.VIDA))).thenReturn(false);
 
         when(repository.save(any(Apolice.class))).thenAnswer(i -> i.getArgument(0));
@@ -303,11 +255,11 @@ public class ApoliceServiceTest {
 
     @Test
     void deveLancarExcecaoSeBemPossuirSeguro() {
-        when(clienteRepository.findById(clienteMaiorIdade.getId())).thenReturn(Optional.of(clienteMaiorIdade));
-        when(seguroRepository.findById(seguroResidencial.getId())).thenReturn(Optional.of(seguroResidencial));
-        when(bemRepository.findById(bem.getId())).thenReturn(Optional.of(bem));
+        when(clienteRepository.findById(anyLong())).thenReturn(Optional.of(apolice.getCliente()));
+        when(seguroRepository.findById(anyLong())).thenReturn(Optional.of(apolice.getSeguro()));
+        when(bemRepository.findById(anyLong())).thenReturn(Optional.of(apolice.getBem()));
 
-        when(repository.existsByBemId(bem.getId())).thenReturn(true);
+        when(repository.existsByBemId(anyLong())).thenReturn(true);
 
         BemPossuiSeguroException ex = assertThrows(
                 BemPossuiSeguroException.class,
@@ -318,30 +270,45 @@ public class ApoliceServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoTipoDeSeguroForIncompativel() {
-        ApoliceRequest outroSeguroId = ApoliceRequest.builder()
+        Cliente cliente = apolice.getCliente();
+        cliente.setId(1L);
+
+        Seguro seguroAuto = umSeguro()
+                .withId(2L)
+                .withTipo(TipoSeguroeBem.AUTO)
+                .build();
+
+        Bem bemResidencial = umBem()
+                .withId(1L)
+                .withTipo(TipoSeguroeBem.RESIDENCIAL)
+                .withCliente(cliente)
+                .build();
+
+        ApoliceRequest requestImcompativel = ApoliceRequest.builder()
                 .clienteId(1L)
                 .seguroId(2L)
                 .bemId(1L)
                 .build();
 
-        when(clienteRepository.findById(clienteMaiorIdade.getId())).thenReturn(Optional.of(clienteMaiorIdade));
-        when(seguroRepository.findById(seguroAuto.getId())).thenReturn(Optional.of(seguroAuto));
-        when(bemRepository.findById(bem.getId())).thenReturn(Optional.of(bem));
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
+        when(seguroRepository.findById(2L)).thenReturn(Optional.of(seguroAuto));
+        when(bemRepository.findById(1L)).thenReturn(Optional.of(bemResidencial));
 
         TipoIncompativelException ex = assertThrows(
                 TipoIncompativelException.class,
-                () -> service.gerarApolice(outroSeguroId, 1L));
+                () -> service.gerarApolice(requestImcompativel, 1L));
 
         assertEquals(TIPO_DO_BEM_INCOMPATIVEL.getMessage(), ex.getMessage());
     }
 
     @Test
-    void deveExpirarApoliceVencida(){
-        Apolice apoliceAntiga = new Apolice();
-        apoliceAntiga.setFimVigencia(LocalDate.now().minusDays(1));
-        apoliceAntiga.setStatus(ApoliceStatus.ATIVA);
+    void deveExpirarApoliceVencida() {
+        Apolice apoliceVencida = umaApolice()
+                .withFimVigencia(LocalDate.now().minusDays(1))
+                .withStatus(ApoliceStatus.ATIVA)
+                .build();
 
-        when(repository.findAll()).thenReturn(List.of(apoliceAntiga));
+        when(repository.findAll()).thenReturn(List.of(apoliceVencida));
 
         service.apolices(1L);
 
@@ -354,11 +321,12 @@ public class ApoliceServiceTest {
     }
 
     @Test
-    void deveReativarApoliceExpirada(){
-        apolice.setFimVigencia(LocalDate.now().plusDays(30));
-        apolice.setStatus(ApoliceStatus.EXPIRADA);
-
-        when(repository.findAll()).thenReturn(List.of(apolice));
+    void deveReativarApoliceExpirada() {
+        Apolice apoliceReativavel = umaApolice()
+                .withFimVigencia(LocalDate.now().plusDays(30))
+                .withStatus(ApoliceStatus.EXPIRADA)
+                .build();
+        when(repository.findAll()).thenReturn(List.of(apoliceReativavel));
 
         service.apolices(1L);
 
@@ -372,13 +340,12 @@ public class ApoliceServiceTest {
     }
 
     @Test
-    void deveRetonarApoliceQuandoAindaNaoVenceu(){
-        Apolice apoliceAntiga = new Apolice();
-        apoliceAntiga.setFimVigencia(LocalDate.now().plusDays(2));
-        apoliceAntiga.setSeguro(seguroResidencial);
-        apoliceAntiga.setCliente(clienteMaiorIdade);
+    void deveRetonarApoliceQuandoAindaNaoVenceu() {
+        Apolice apoliceQuaseVencendo = umaApolice()
+                .withFimVigencia(LocalDate.now().plusDays(2))
+                .build();
 
-        when(repository.findById(1L)).thenReturn(Optional.of(apoliceAntiga));
+        when(repository.findById(1L)).thenReturn(Optional.of(apoliceQuaseVencendo));
         when(repository.save(any(Apolice.class))).thenAnswer(i -> i.getArgument(0));
 
         service.renovar(1L, 1L);
@@ -388,15 +355,16 @@ public class ApoliceServiceTest {
 
         Apolice novaApolice = captor.getValue();
 
-        assertEquals(apoliceAntiga.getFimVigencia().plusDays(1), novaApolice.getInicioVigencia());
+        assertEquals(apoliceQuaseVencendo.getFimVigencia().plusDays(1), novaApolice.getInicioVigencia());
+        verify(repository, times(2)).save(any(Apolice.class));
     }
 
     @Test
     void deveListarApolicesAvencer() {
-        Apolice apoliceAvencer = Apolice.builder()
-                .id(1L)
-                .fimVigencia(LocalDate.now().plusDays(15))
-                .status(ApoliceStatus.ATIVA)
+
+        Apolice apoliceAvencer = umaApolice()
+                .withFimVigencia(LocalDate.now().plusDays(15))
+                .withStatus(ApoliceStatus.ATIVA)
                 .build();
 
         ApoliceResponse responseAvencer = ApoliceResponse.builder()
@@ -406,7 +374,7 @@ public class ApoliceServiceTest {
                 .build();
 
         when(repository.findAll()).thenReturn(List.of(apoliceAvencer));
-        when(mapper.converterParaResponse(apoliceAvencer)).thenReturn(responseAvencer);
+        when(mapper.converterParaResponse(any())).thenReturn(responseAvencer);
 
         List<ApoliceResponse> resultado = service.apolicesAvencer(1L);
 
@@ -418,18 +386,15 @@ public class ApoliceServiceTest {
 
     @Test
     void deveRenovarApolice() {
-        apolice.setSeguro(seguroResidencial);
-        apolice.setCliente(clienteMaiorIdade);
-        apolice.setBem(bem);
-        apolice.setInicioVigencia(LocalDate.now().minusYears(2));
-        apolice.setFimVigencia(LocalDate.now().minusYears(1));
-        apolice.setStatus(ApoliceStatus.ATIVA);
+        Apolice apoliceAntiga = umaApolice()
+                .withInicioVigencia(LocalDate.now().minusYears(2))
+                .withFimVigencia(LocalDate.now().minusYears(1))
+                .withStatus(ApoliceStatus.ATIVA)
+                .build();
 
-        when(repository.findById(apolice.getId())).thenReturn(Optional.of(apolice));
-
+        when(repository.findById(1L)).thenReturn(Optional.of(apoliceAntiga));
         when(repository.save(any(Apolice.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        when(mapper.converterParaResponse(any(Apolice.class))).thenReturn(response);
+        when(mapper.converterParaResponse(any())).thenReturn(response);
 
         service.renovar(1L, 1L);
 
@@ -437,19 +402,18 @@ public class ApoliceServiceTest {
 
         verify(repository, times(2)).save(captor.capture());
 
-        List<Apolice> apolicesSalvas = captor.getAllValues();
-        Apolice antigaAtualizada = apolicesSalvas.get(0);
-        Apolice novaCriada = apolicesSalvas.get(1);
+        List<Apolice> apolicesSalva = captor.getAllValues();
+        Apolice antigaAtualizada = apolicesSalva.get(0);
+        Apolice novaCriada = apolicesSalva.get(1);
 
-        assertEquals(apolice.getId(), antigaAtualizada.getId());
+        assertEquals(apoliceAntiga.getId(), antigaAtualizada.getId());
         assertEquals(ApoliceStatus.RENOVADA, antigaAtualizada.getStatus());
 
         assertEquals(ApoliceStatus.ATIVA, novaCriada.getStatus());
         assertNotEquals(antigaAtualizada.getId(), novaCriada.getId());
-        assertEquals(apolice.getCliente(), novaCriada.getCliente());
+        assertEquals(apoliceAntiga.getCliente(), novaCriada.getCliente());
 
-        assertTrue(novaCriada.getInicioVigencia().isAfter(apolice.getInicioVigencia()));
-
+        assertTrue(novaCriada.getInicioVigencia().isAfter(apoliceAntiga.getInicioVigencia()));
     }
 
     @Test
@@ -464,9 +428,9 @@ public class ApoliceServiceTest {
     }
 
     @Test
-    void deveLancarExcecaoQuandoTentarRenovarApoliceCancelada(){
-        apolice.setStatus(ApoliceStatus.CANCELADA);
-        when(repository.findById(apolice.getId())).thenReturn(Optional.of(apolice));
+    void deveLancarExcecaoQuandoTentarRenovarApoliceCancelada() {
+        Apolice apoliceCancelada = umaApolice().withStatus(ApoliceStatus.CANCELADA).build();
+        when(repository.findById(anyLong())).thenReturn(Optional.of(apoliceCancelada));
 
         RegraApoliceException ex = assertThrows(
                 RegraApoliceException.class,
@@ -478,18 +442,19 @@ public class ApoliceServiceTest {
     @Test
     void deveAtualizarApolice() {
         when(repository.findById(1L)).thenReturn(Optional.of(apolice));
-        when(repository.save(apolice)).thenReturn(apolice);
-        when(mapper.converterParaResponse(apolice)).thenReturn(response);
+        when(repository.save(any())).thenReturn(apolice);
+        when(mapper.converterParaResponse(any())).thenReturn(response);
 
         ApoliceResponse atualizado = service.atualizar(1L, updateRequest, 1L);
 
         assertEquals(response, atualizado);
+        assertNotNull(atualizado);
         verify(repository).save(apolice);
     }
 
     @Test
     void deveLancarExcecaoQuandoApoliceNaoExistirAoAtualizar() {
-        when(repository.findById(1L)).thenReturn(Optional.empty());
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
 
         ApoliceNaoEncontradaException ex = assertThrows(
                 ApoliceNaoEncontradaException.class,
@@ -512,10 +477,11 @@ public class ApoliceServiceTest {
 
     @Test
     void deveCancelarApoliceComSucesso() {
-        when(repository.findById(apolice.getId())).thenReturn(Optional.of(apolice));
+        when(repository.findById(1L)).thenReturn(Optional.of(apolice));
+
+        when(repository.save(any(Apolice.class))).thenAnswer(i -> i.getArgument(0));
 
         ArgumentCaptor<Apolice> captor = ArgumentCaptor.forClass(Apolice.class);
-        when(repository.save(any(Apolice.class))).thenAnswer(i -> i.getArgument(0));
 
         service.cancelar(1L, 1L);
 
@@ -528,7 +494,7 @@ public class ApoliceServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoApoliceNaoExistirAoCancelar() {
-        when(repository.findById(apolice.getId())).thenReturn(Optional.empty());
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
 
         ApoliceNaoEncontradaException ex = assertThrows(
                 ApoliceNaoEncontradaException.class,

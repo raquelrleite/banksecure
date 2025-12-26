@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static br.com.banksecure.app.builder.FuncionarioBuilder.umFuncionario;
 import static br.com.banksecure.app.enums.ErrorMessage.LOGIN_INVALIDO;
 import static br.com.banksecure.app.enums.ErrorMessage.USERNAME_INVALIDO;
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,24 +40,19 @@ public class FuncionarioServiceTest {
 
     @BeforeEach
     void setUp() {
-        funcionario = Funcionario.builder()
-                .id(1L)
-                .nome("João Silva")
-                .username("joao.silva")
-                .password("senha123")
-                .build();
+        funcionario = umFuncionario().build();
 
         request = FuncionarioRequest.builder()
-                .nome("João Silva")
-                .username("joao.silva")
+                .nome("Ana Silva")
+                .username("ana.silva")
                 .password("senha123")
                 .build();
 
 
         response = FuncionarioResponse.builder()
                 .id(1L)
-                .nome("João Silva")
-                .username("joao.silva")
+                .nome("Ana Silva")
+                .username("ana.silva")
                 .build();
     }
 
@@ -90,7 +86,7 @@ public class FuncionarioServiceTest {
     @Test
     void deveRealizarLoginComSucesso() {
         LoginRequest login = LoginRequest.builder()
-                .username("joao.silva")
+                .username("ana.silva")
                 .password("senha123")
                 .build();
 
@@ -106,7 +102,7 @@ public class FuncionarioServiceTest {
     @Test
     void deveLancarExcecaoAoRealizarLoginComDadosInvalidos() {
         LoginRequest login = LoginRequest.builder()
-                .username("joao.silva")
+                .username("usuarioErrado")
                 .password("senhaErrada")
                 .build();
 

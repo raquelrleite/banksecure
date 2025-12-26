@@ -22,6 +22,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(BemController.class)
 public class BemControllerTest {
 
+    private static final String URL_BASE = "/bem";
+    private static final String HEADER_FUNC_ID = "X-Funcionario-Id";
+    private static final Long ID_PADRAO = 1L;
+
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -35,23 +40,23 @@ public class BemControllerTest {
     void deveCadastrarBemComSucesso() throws Exception {
 
         BemRequest request = BemRequest.builder()
-                .clienteId(1L)
+                .clienteId(ID_PADRAO)
                 .tipo(TipoSeguroeBem.RESIDENCIAL)
                 .descricao("Rua Localhost, nº 127.0.0.1, Apto 404")
                 .build();
 
         BemResponse response = BemResponse.builder()
-                .id(1L)
-                .clienteId(1L)
+                .id(ID_PADRAO)
+                .clienteId(ID_PADRAO)
                 .tipo(TipoSeguroeBem.RESIDENCIAL)
                 .descricao("Rua Localhost, nº 127.0.0.1, Apto 404")
                 .build();
 
-        when(service.cadastrar(request, 1L)).thenReturn(response);
+        when(service.cadastrar(request, ID_PADRAO)).thenReturn(response);
 
-        mockMvc.perform(post("/bem")
+        mockMvc.perform(post(URL_BASE)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Funcionario-Id", 1L)
+                        .header(HEADER_FUNC_ID, ID_PADRAO)
                         .content(objectMapper.writeValueAsString(request)))
 
                 .andExpect(status().isOk())
@@ -68,17 +73,17 @@ public class BemControllerTest {
                 .build();
 
         BemResponse responseUpdate = BemResponse.builder()
-                .id(1L)
-                .clienteId(1L)
+                .id(ID_PADRAO)
+                .clienteId(ID_PADRAO)
                 .tipo(TipoSeguroeBem.RESIDENCIAL)
                 .descricao("Rua Localhost, nº 500")
                 .build();
 
-        when(service.atualizar(1L, updateRequest, 1L)).thenReturn(responseUpdate);
+        when(service.atualizar(ID_PADRAO, updateRequest, ID_PADRAO)).thenReturn(responseUpdate);
 
-        mockMvc.perform(patch("/bem/{bemId}", 1L)
+        mockMvc.perform(patch(URL_BASE + "/{bemId}", ID_PADRAO)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Funcionario-Id", 1L)
+                        .header(HEADER_FUNC_ID, ID_PADRAO)
                         .content(objectMapper.writeValueAsString(updateRequest)))
 
                 .andExpect(status().isOk())

@@ -2,15 +2,10 @@ package br.com.banksecure.app.domain;
 
 import br.com.banksecure.app.enums.TipoSeguroeBem;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "bem")
 public class Bem {

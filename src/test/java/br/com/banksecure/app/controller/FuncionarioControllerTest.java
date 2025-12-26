@@ -20,6 +20,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(FuncionarioController.class)
 public class FuncionarioControllerTest {
+
+    private static final String URL_BASE = "/funcionarios";
+
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -53,7 +57,7 @@ public class FuncionarioControllerTest {
     void deveCadastrarFuncionarioComSucesso() throws Exception {
         when(service.cadastrar(request)).thenReturn(response);
 
-        mockMvc.perform(post("/funcionarios")
+        mockMvc.perform(post(URL_BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
 
@@ -73,7 +77,7 @@ public class FuncionarioControllerTest {
 
         when(service.login(loginRequest)).thenReturn(response);
 
-        mockMvc.perform(post("/funcionarios/login")
+        mockMvc.perform(post(URL_BASE + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
 
